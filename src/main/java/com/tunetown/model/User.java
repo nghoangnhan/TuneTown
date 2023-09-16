@@ -1,13 +1,13 @@
 package com.tunetown.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,4 +21,16 @@ public class User {
     private String userName;
     private String email;
     private String password;
+    private String role;
+    private Date birthDate;
+    private String userBio;
+    private String avatar;
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Song> history;
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<Genre> favoriteGenres;
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Playlist> playlists;
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<User> followingArtists;
 }
