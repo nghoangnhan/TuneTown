@@ -26,6 +26,7 @@ public class Song {
     private String songData;
     private int likes;
     private int listens;
+    private int status;
 
 
 }

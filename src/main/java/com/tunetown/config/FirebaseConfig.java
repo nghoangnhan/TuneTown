@@ -35,4 +35,8 @@ public class FirebaseConfig {
                 .build();
 
         return FirebaseApp.initializeApp(options);
+<<<<<<< HEAD
     }}
+=======
+    }}
+>>>>>>> 6965533f857d8e954b5b65eb5774732861f30023
