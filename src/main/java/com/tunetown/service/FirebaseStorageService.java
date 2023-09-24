@@ -7,13 +7,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.cloud.StorageClient;
 import com.tunetown.config.FirebaseConfig;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.StorageOptions;import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.StorageOptions;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,9 +23,13 @@ public class FirebaseStorageService {
 
     String downloadUrlImage = "";
     String downloadUrlData = "";
-
     String appCheckToken = "";
 
+
+    /**
+     * Generate App Token for handle with FirebaseStorage
+     * @return Token
+     */
     private String generateAppCheckToken() {
         try {
             appCheckToken = Arrays.toString(FirebaseAuth.getInstance(firebaseConfig.firebaseApp())
@@ -47,7 +45,15 @@ public class FirebaseStorageService {
     }
 
 
-    // Upload Image to Firebase
+    /**
+     * - Get storage on firebase
+     * - Set type for fileUpload and generateAppCheckToken
+     * - Create a new fileUpload on storage
+     * @param filePath: Get from computer
+     * @param fileName: Get the name of file from filePath
+     * @return downloadUrl used to add to songPoster field
+     * @throws IOException
+     */
     public String uploadImage(String filePath, String fileName) throws IOException {
         InputStream fileContentImage = new FileInputStream(filePath);
         try {
@@ -78,7 +84,6 @@ public class FirebaseStorageService {
 
 
             return downloadUrlImage;
-
         } catch (Exception e) {
             // Handle any other exception
             throw new RuntimeException(e);
@@ -86,7 +91,15 @@ public class FirebaseStorageService {
     }
 
 
-    // Upload MP3 file to storage
+    /**
+     * - Get storage on firebase
+     * - Set type for fileUpload and generateAppCheckToken
+     * - Create a new fileUpload on storage
+     * @param filePath: Get from computer
+     * @param fileName: Get the name of file from filePath
+     * @return downloadUrl used to add to songData field
+     * @throws IOException
+     */
     public String uploadMp3(String filePath, String fileName) throws IOException {
         InputStream fileContent2 = new FileInputStream(filePath);
         try {
