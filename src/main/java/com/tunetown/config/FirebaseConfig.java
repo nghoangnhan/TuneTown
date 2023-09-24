@@ -23,7 +23,7 @@ public class FirebaseConfig {
      */
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        serviceAccount = new FileInputStream("tunetown-6b63a-firebase-adminsdk-9g0m6-193c149ad7.json");
+        serviceAccount = new FileInputStream("FirebaseCredentials/tunetown-6b63a-firebase-adminsdk-9g0m6-193c149ad7.json");
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setDatabaseUrl("https://tunetown-6b63a-default-rtdb.firebaseio.com") // Replace with your Firebase Realtime Database URL
