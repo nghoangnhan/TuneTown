@@ -1,5 +1,6 @@
 package com.tunetown.service;
 
+import com.google.api.Http;
 import com.tunetown.model.User;
 import com.tunetown.repository.UserRepository;
 import jakarta.annotation.Resource;
@@ -19,7 +20,19 @@ public class UserService {
         return userRepository.findAll();
     }
     public void addUser(User user) {
-        userRepository.save(user);
+
+        Optional<User> dbUser = userRepository.getUserByEmail(user.getEmail());
+        if(dbUser.isPresent())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, user.getEmail() + " has already existed");
+        else
+            userRepository.save(user);
+    }
+    public User getUserById(int userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if(optionalUser.isPresent())
+            return optionalUser.get();
+        else
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No User found with ID: " + userId);
     }
 
     public User getActiveUserByEmail(String userEmail) {

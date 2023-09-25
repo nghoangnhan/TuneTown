@@ -22,6 +22,7 @@ public class User {
     private String email;
     private String password;
     private String role;
+    @Temporal(TemporalType.DATE)
     private Date birthDate;
     private String userBio;
     private String avatar;
@@ -29,8 +30,6 @@ public class User {
     private List<Song> history;
     @OneToMany(fetch = FetchType.EAGER)
     private List<Genre> favoriteGenres;
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Playlist> playlists;
     @OneToMany(fetch = FetchType.EAGER)
     private List<User> followingArtists;
 }
