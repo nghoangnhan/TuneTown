@@ -4,6 +4,7 @@ import com.tunetown.model.Song;
 import com.tunetown.repository.SongRepository;
 import com.tunetown.service.SongService;
 import jakarta.annotation.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/songs")
 public class SongController {
     @Resource
     SongService songService;
@@ -19,23 +21,23 @@ public class SongController {
     SongRepository songRepository;
 
 
-    @GetMapping(path = "/song/getAll")
-    public List<Song> getAllSongs(){
-        return songService.getAllSongs();
+    @GetMapping // song?pageNo=
+    public Page<List<Song>> getAllSongs(@RequestParam int pageNo){
+        return songService.getAllSongs(pageNo);
     }
 
-    @PostMapping(path = "/addSong", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addSong(@RequestBody Song song ){
         songService.addSong(song);
     }
 
 
-    @DeleteMapping(path = "/deleteSong/{songId}")
+    @DeleteMapping(path = "/deleteSong/{songId}")       // deleteSong?songsId=
     public void deleteSong(@PathVariable("songId") int id){
         songService.deleteSong(id);
     }
 
-    @PutMapping(path = "/updateSong/{songID}")
+    @PutMapping(path = "/updateSong/{songID}") // updateSongs?songId=1
     public void updateStudent(@PathVariable("songID") int id,
                               @RequestParam(required = false) String name,
                               @RequestParam(required = false) String poster,

@@ -1,5 +1,6 @@
 package com.tunetown.service;
 
+import com.google.api.Http;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.storage.BlobInfo;
 import com.google.common.collect.ImmutableMap;
@@ -13,6 +14,9 @@ import com.tunetown.repository.SongRepository;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.Part;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,8 +38,9 @@ public class SongService {
     @Resource
     FirebaseConfig firebaseConfig;
 
-    public List<Song> getAllSongs(){
-        return songRepository.findByStatus(1);
+    public Page<List<Song>> getAllSongs(int pageNumber){
+        Pageable pageable = (Pageable) PageRequest.of(pageNumber, 100);
+        return songRepository.findByStatus(1, pageable);
     }
 
     public void addSong(Song song){
@@ -47,7 +52,7 @@ public class SongService {
     public void deleteSong(int id){
         boolean song = songRepository.existsById(id);
         if(!song){
-            throw new IllegalStateException("Song with id = "+id +" does not exist!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = "+id +" does not exist!");
         }
         getActiveSongById(id).setStatus(0);
         songRepository.save(getActiveSongById(id));
