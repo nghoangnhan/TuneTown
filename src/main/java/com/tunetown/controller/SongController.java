@@ -6,6 +6,7 @@ import com.tunetown.service.FirebaseStorageService;
 import com.tunetown.service.SongService;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/songs")
 public class SongController {
     @Resource
     SongService songService;
@@ -35,14 +37,13 @@ public class SongController {
     // TODO: Get filePath from FileChooser on Front-End
     String filePath = "";
 
-
     /**
      * Get songs by numbers in each page using Paging Technique
      * @param page: Page number 1 for default
      * @param size: size of items each page
      * @return
      */
-    @GetMapping(path = "/song")
+    @GetMapping
     public Page<Song> getAllSongs(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
         PageRequest pageRequest = PageRequest.of(page, size);
         return songService.getAllSongs(pageRequest);
@@ -56,7 +57,6 @@ public class SongController {
         songService.addSong(song);
         return ResponseEntity.ok("Song added successfully");
     }
-
 
     @DeleteMapping(path = "/deleteSong/songId={songId}")
     public ResponseEntity<String> deleteSong(@PathVariable("songId") int id){
