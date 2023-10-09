@@ -29,7 +29,10 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .roles("USER")
                 .build();
-        userService.addUser((com.tunetown.model.User) user);
+        com.tunetown.model.User modelUser = new com.tunetown.model.User();
+        modelUser.setEmail(user.getUsername());
+        modelUser.setPassword(user.getPassword());
+        userService.addUser((com.tunetown.model.User) modelUser);
 
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder().token(jwtToken).build();
