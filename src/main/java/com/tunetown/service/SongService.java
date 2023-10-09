@@ -1,31 +1,16 @@
 package com.tunetown.service;
 
-import com.google.api.Http;
-import com.google.api.services.storage.Storage;
-import com.google.cloud.storage.BlobInfo;
-import com.google.common.collect.ImmutableMap;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.cloud.StorageClient;
 import com.tunetown.config.FirebaseConfig;
-import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
 import com.tunetown.repository.SongRepository;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.Part;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 

@@ -43,6 +43,6 @@ public class PlaylistService {
     }
 
     public List<Playlist> getAllPlaylistByUserId(int userId) {
-        return getAllPlaylistByUserId(userId);
+        return playlistRepository.getAllPlaylistsByUserId(userId);
     }
 }
