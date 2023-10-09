@@ -4,16 +4,16 @@ import com.tunetown.model.authentication.AuthenticationRequest;
 import com.tunetown.model.authentication.AuthenticationResponse;
 import com.tunetown.model.authentication.RegisterRequest;
 import com.tunetown.service.jwt.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 @Service
+@Slf4j
 public class AuthenticationService {
     @Resource
     UserService userService;
@@ -29,25 +29,33 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .roles("USER")
                 .build();
+
         com.tunetown.model.User modelUser = new com.tunetown.model.User();
         modelUser.setEmail(user.getUsername());
         modelUser.setPassword(user.getPassword());
-        userService.addUser((com.tunetown.model.User) modelUser);
+
+        userService.addUser(modelUser);
 
         var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return AuthenticationResponse.builder().access_token(jwtToken).build();
     }
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
-                request.getPassword()
-                )
-        );
+//        authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        request.getEmail(),
+//                        passwordEncoder.encode(request.getPassword())
+//                )
+//        );
         var user = userService.getActiveUserByEmail(request.getEmail());
-        var jwtToken = jwtService.generateToken((UserDetails) user);
-        return AuthenticationResponse
-                .builder()
-                .token(jwtToken)
-                .build();}
+
+        var userDetails = User.builder()
+                .username(user.getEmail())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .roles(user.getRole())
+                .build();
+
+        var jwtToken = jwtService.generateToken(userDetails);
+
+        return AuthenticationResponse.builder().access_token(jwtToken).build();
+    }
 }

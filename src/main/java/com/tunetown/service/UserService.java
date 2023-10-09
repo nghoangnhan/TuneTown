@@ -5,6 +5,8 @@ import com.tunetown.model.User;
 import com.tunetown.repository.UserRepository;
 import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,6 +17,9 @@ import java.util.Optional;
 public class UserService {
     @Resource
     UserRepository userRepository;
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -25,7 +30,11 @@ public class UserService {
         if(dbUser.isPresent())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, user.getEmail() + " has already existed");
         else
+        {
+            String encodedPassword = passwordEncoder().encode(user.getPassword());
+            user.setPassword(encodedPassword);
             userRepository.save(user);
+        }
     }
     public User getUserById(int userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
