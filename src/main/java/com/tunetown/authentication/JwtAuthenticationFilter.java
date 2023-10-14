@@ -36,7 +36,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {       //TODO consider the space after Bearer
+        if(request.getServletPath().equals("/auth/register") || request.getServletPath().equals("/auth/authenticate") || request.getServletPath().equals("/auth/forgetPassword")) {
+            try {
+                filterChain.doFilter(request, response);
+            } catch (Exception e) {
+                log.error("Exception: " + e.getMessage());
+            }
+        }
+        else if(authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.info("authHear is null or not start with Bearer");
             filterChain.doFilter(request, response);
         }

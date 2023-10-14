@@ -5,6 +5,7 @@ import com.tunetown.model.authentication.AuthenticationResponse;
 import com.tunetown.model.authentication.RegisterRequest;
 import com.tunetown.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,16 +17,19 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationController {
     @Resource
     private AuthenticationService authenticationService;
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authenticationService.register(request));
-    }
-    @PostMapping("/getAccessToken")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+    public AuthenticationResponse register(@RequestBody RegisterRequest request) {
+        try {
+            AuthenticationResponse authenticationResponse = authenticationService.register(request);
+        } catch (Exception ex) {
+            log.info("Exception: " + ex.getMessage());
+            throw ex;
+        }
+        return authenticationService.register(request);
     }
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {

@@ -4,6 +4,7 @@ import com.google.api.Http;
 import com.tunetown.model.User;
 import com.tunetown.repository.UserRepository;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserService {
     @Resource
     UserRepository userRepository;
@@ -28,7 +30,10 @@ public class UserService {
 
         Optional<User> dbUser = userRepository.getUserByEmail(user.getEmail());
         if(dbUser.isPresent())
+        {
+            log.info("Email has already existed");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, user.getEmail() + " has already existed");
+        }
         else
         {
             String encodedPassword = passwordEncoder().encode(user.getPassword());
