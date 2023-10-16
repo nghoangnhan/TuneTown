@@ -1,6 +1,5 @@
 package com.tunetown.service;
 
-import com.google.api.Http;
 import com.tunetown.model.authentication.AuthenticationRequest;
 import com.tunetown.model.authentication.AuthenticationResponse;
 import com.tunetown.model.authentication.RegisterRequest;
@@ -8,15 +7,12 @@ import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
@@ -31,7 +27,6 @@ public class AuthenticationService {
 
     /**
      * Allow user to register new account
-     * @param request
      * @return Access Token after new account has been saved
      */
     public AuthenticationResponse register(RegisterRequest request) {
@@ -49,12 +44,7 @@ public class AuthenticationService {
         dbUser.setPassword(request.getPassword());
         dbUser.setBirthDate(request.getBirthDate());
         dbUser.setRole("USER");
-        try{
-            userService.addUser(dbUser);
-        } catch (Exception ex) {
-            log.info("Exception: " + ex.getMessage());
-            throw ex;
-        }
+        userService.addUser(dbUser);
 
         // Return access_token after save new user
         String jwtToken = jwtService.generateToken(user);

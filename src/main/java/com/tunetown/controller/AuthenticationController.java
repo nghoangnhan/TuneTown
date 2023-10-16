@@ -21,12 +21,6 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
     @PostMapping("/register")
     public AuthenticationResponse register(@RequestBody RegisterRequest request) {
-        try {
-            AuthenticationResponse authenticationResponse = authenticationService.register(request);
-        } catch (Exception ex) {
-            log.info("Exception: " + ex.getMessage());
-            throw ex;
-        }
         return authenticationService.register(request);
     }
     @PostMapping("/authenticate")

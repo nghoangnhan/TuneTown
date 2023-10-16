@@ -28,8 +28,8 @@ public class User {
     private String avatar;
     @OneToMany(fetch = FetchType.LAZY)
     private List<Song> history;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY)
     private List<Genre> favoriteGenres;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY)
     private List<User> followingArtists;
 }
