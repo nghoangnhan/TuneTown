@@ -1,30 +1,16 @@
 package com.tunetown.service;
 
-import com.google.api.Http;
-import com.google.api.services.storage.Storage;
-import com.google.cloud.storage.BlobInfo;
-import com.google.common.collect.ImmutableMap;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.cloud.StorageClient;
 import com.tunetown.config.FirebaseConfig;
-import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
 import com.tunetown.repository.SongRepository;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.Part;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -130,6 +116,25 @@ public class SongService {
         }
         else{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + id + " does not exists!");
+        }
+    }
+
+
+    /**
+     * Find by songName or artistName, just find active songs
+     * @param name Use songName or artistName. It can be split into two parts if user input both songName and artistName
+     * @return: list of songs found
+     */
+    public List<Song> findSongByNameOrArtist(String name){
+        String[] parts = name.split(" "); // Split the name parameter into parts by space
+        String songName = parts[0]; // First part is treated as the song name
+        String artistName = parts.length > 1 ? parts[1] : ""; // Second part is treated as the artistName
+        List<Song> listSong = songRepository.findSongByNameOrArtist(songName, artistName);
+        if (!listSong.isEmpty()){
+            return listSong;
+        }
+        else{
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No result found!");
         }
     }
 }

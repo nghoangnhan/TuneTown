@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.cloud.StorageClient;
 import com.tunetown.config.FirebaseConfig;
+import com.tunetown.repository.SongRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class FirebaseStorageService {
@@ -22,9 +22,9 @@ public class FirebaseStorageService {
     FirebaseConfig firebaseConfig;
 
     String downloadUrlImage = "";
-    String downloadUrlData = "";
     String appCheckToken = "";
-
+    String songData = "";
+    String partDownloadUrl = "";
 
     /**
      * Generate App Token for handle with FirebaseStorage
@@ -94,43 +94,44 @@ public class FirebaseStorageService {
     /**
      * - Get storage on firebase
      * - Set type for fileUpload and generateAppCheckToken
-     * - Create a new fileUpload on storage
+     * - Upload by each chunk of chunk size by separating file capacity
      * @param filePath: Get from computer
      * @param fileName: Get the name of file from filePath
      * @return downloadUrl used to add to songData field
      * @throws IOException
      */
-    public String uploadMp3(String filePath, String fileName) throws IOException {
+    public String uploadMp3(String filePath, String fileName, int numberOfParts) throws IOException {
+        // Read file MP3 from filePath
         InputStream fileContent2 = new FileInputStream(filePath);
+
+        // Size of each part
+        long fileLength = fileContent2.available(); // Get the total length of the file
+        int chunkSize = (int) Math.ceil((double) fileLength / numberOfParts);
+
+        int bytesRead;
+        int partNumber = 1;
+
+        // Firebase storage config
         try {
             Storage storage = StorageClient.getInstance(firebaseConfig.firebaseApp()).bucket("tunetown-6b63a.appspot.com").getStorage();
 
-            BlobInfo blobInfo = BlobInfo.newBuilder("tunetown-6b63a.appspot.com", "audios/" + fileName)
-                    .setContentType("audio/mpeg")
-                    .setMetadata(ImmutableMap.of("firebaseStorageDownloadTokens", generateAppCheckToken()))
-                    .build();
+            byte[] chunk = new byte[chunkSize];
+            // Read and upload each part
+            while ((bytesRead = fileContent2.read(chunk)) > 0) {
+                int subString = fileName.length() - 4;
+                // Upload each part on firebase
+                BlobInfo partInfo = BlobInfo.newBuilder(BlobId.of("tunetown-6b63a.appspot.com", "audios/" + fileName.substring(0, subString) + "/" + fileName.substring(0, subString) + "_" + partNumber + ".mp3"))
+                        .setContentType("audio/mpeg")
+                        .build();
 
-            // Upload the file to Firebase Storage
-            storage.create(blobInfo, fileContent2,
-                    Storage.BlobWriteOption.userProject("tunetown-6b63a"),
-                    Storage.BlobWriteOption.predefinedAcl(Storage.PredefinedAcl.PUBLIC_READ));
+                storage.create(partInfo, chunk);
 
-            // Encode the token using Base64 encoding
-            String encodedFilePath = URLEncoder.encode("audios/" + fileName, "UTF-8");
-            downloadUrlData = "https://firebasestorage.googleapis.com/v0/b/" +
-                    "tunetown-6b63a.appspot.com" +
-                    "/o/" +
-                    encodedFilePath +
-                    "?alt=media";
-
-            String token = UUID.randomUUID().toString();
-            String encodedToken = URLEncoder.encode(token, "UTF-8");
-
-            // TODO: Use downloadUrlData to add to Song.Data()
-            downloadUrlData = downloadUrlData + "&token=" + encodedToken;
-
-
-            return downloadUrlData;
+                // Get the URL of each part
+                partDownloadUrl = "https://storage.googleapis.com/tunetown-6b63a.appspot.com/audios/" + fileName.substring(0, subString) + "/" + fileName.substring(0, subString) + "_" + partNumber + ".mp3";
+                partNumber++;
+            }
+            songData = partDownloadUrl.substring(0, partDownloadUrl.length() - 5);
+            return songData;
         }
         catch (Exception e) {
             // Handle any other exception
