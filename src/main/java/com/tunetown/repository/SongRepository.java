@@ -21,9 +21,11 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
     @Query("SELECT s FROM Song s WHERE s.status = ?1")
     Page<List<Song>> findByStatus(int status, Pageable pageable);
 
+
     @Query("SELECT s FROM Song s JOIN s.artists a WHERE s.status = 0 AND ((s.songName LIKE %:songName% OR a.userName LIKE %:songName%)" +
             " OR (s.songName LIKE %:songName% AND a.userName LIKE %:artistName%) " +
             "OR (CONCAT(s.songName, '', a.userName) LIKE %:songName%) " +
             "OR (CONCAT(a.userName, '', s.songName) LIKE %:songName%))")
     List<Song> findSongByNameOrArtist(String songName, String artistName);
+
 }
