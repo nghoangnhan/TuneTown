@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -115,6 +116,25 @@ public class SongService {
         }
         else{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + id + " does not exists!");
+        }
+    }
+
+
+    /**
+     * Find by songName or artistName, just find active songs
+     * @param name Use songName or artistName. It can be split into two parts if user input both songName and artistName
+     * @return: list of songs found
+     */
+    public List<Song> findSongByNameOrArtist(String name){
+        String[] parts = name.split(" "); // Split the name parameter into parts by space
+        String songName = parts[0]; // First part is treated as the song name
+        String artistName = parts.length > 1 ? parts[1] : ""; // Second part is treated as the artistName
+        List<Song> listSong = songRepository.findSongByNameOrArtist(songName, artistName);
+        if (!listSong.isEmpty()){
+            return listSong;
+        }
+        else{
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No result found!");
         }
     }
 }
