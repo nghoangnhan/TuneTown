@@ -9,17 +9,14 @@ import org.springframework.data.domain.Page;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -35,7 +32,7 @@ public class SongController {
     FirebaseStorageService firebaseStorageService;
 
     // TODO: Get filePath from FileChooser on Front-End
-    String filePath = "";
+    String filePath = "E:\\Nhạc nền\\Nhói Lòng Thuyền Hoa Remix.mp3";
 
     /**
      * Get songs by numbers in each page using Paging Technique
@@ -58,27 +55,35 @@ public class SongController {
         return ResponseEntity.ok("Song added successfully");
     }
 
-    @DeleteMapping(path = "/deleteSong/songId={songId}")
-    public ResponseEntity<String> deleteSong(@PathVariable("songId") int id){
-        songService.deleteSong(id);
+    @DeleteMapping(path = "/deleteSong")
+    public ResponseEntity<String> deleteSong(@RequestParam("songId") int songId){
+        songService.deleteSong(songId);
         return ResponseEntity.ok("Song deleted successfully");
     }
 
-    @PutMapping(path = "/updateSong/songId={songId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateSong(@PathVariable("songId") int id, @RequestBody Song song){
-        Optional<Song> optionalSong = songRepository.getSongById(id);
+    @PutMapping(path = "/updateSong", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> updateSong(@RequestParam("songId") int songId, @RequestBody Song song){
+        Optional<Song> optionalSong = songRepository.getSongById(songId);
         if (!optionalSong.isPresent()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + id + " does not exists!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + songId + " does not exists!");
         }
         Song oldSong = optionalSong.get();
         // Check if Poster and Data updated
-        if (!Objects.equals(oldSong.getPoster(), song.getPoster()) || !Objects.equals(oldSong.getSongData(), song.getSongData())){
-            // TODO: Call these 2 functions to save data on firebase
-//            uploadImage();
+//        if (!Objects.equals(oldSong.getPoster(), song.getPoster()) || !Objects.equals(oldSong.getSongDatas(), song.getSongDatas())){
+//            // TODO: Call these 2 functions to save data on firebase
+////            uploadImage();
 //            uploadMp3();
-        }
+//            song.setSongData(uploadMp3());
+//        }
         songService.updateSong(song);
         return ResponseEntity.ok("Song updated successfully");
+    }
+
+
+    @PostMapping(path = "/findSong")
+    public List<Song> findSong(@RequestParam("name") String name){
+        List<Song> listSong = songService.findSongByNameOrArtist(name);
+        return listSong;
     }
 
 
@@ -86,13 +91,10 @@ public class SongController {
      * Get Image from filePath on computer and upload to FirebaseStorage
      * @return
      */
-    public String uploadImage() {
-        String downloadUrl = null;
+    public void uploadImage() {
         String fileName = new File(filePath).getName();
         try {
-            downloadUrl = firebaseStorageService.uploadImage(filePath, fileName);
-
-            return downloadUrl;
+            firebaseStorageService.uploadImage(filePath, fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -103,16 +105,14 @@ public class SongController {
      * Get Mp3 data from filePath on computer and upload to FirebaseStorage
      * @return
      */
+//    @PostMapping("uploadMp3")
     public String uploadMp3() {
-        String downloadUrl = null;
         String fileName = new File(filePath).getName();
         try {
-            downloadUrl = firebaseStorageService.uploadMp3(filePath, fileName);
-
-            return downloadUrl;
+            String songData = firebaseStorageService.uploadMp3(filePath, fileName, 10);
+            return songData;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
