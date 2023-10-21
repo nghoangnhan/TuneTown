@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -23,8 +24,20 @@ public class AuthenticationController {
     public AuthenticationResponse register(@RequestBody RegisterRequest request) {
         return authenticationService.register(request);
     }
+
+    /**
+     * Enter email and password for getting accessToken
+     */
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
+    }
+
+    //TODO: need to be implemented
+    @PostMapping("/verifyAccessToken")
+    public Map<String, Object> verifyAccessToken() {
+        return Map.of(
+                "access_token", ""
+        );
     }
 }
