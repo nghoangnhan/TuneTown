@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -20,4 +22,7 @@ public class Playlist {
     private User user;
     private String playlistType;
     private String coverArt;
+
+    @Transient
+    private List<PlaylistSongs> playlistSongsList;
 }

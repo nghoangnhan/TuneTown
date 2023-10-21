@@ -8,6 +8,7 @@ import com.tunetown.repository.PlaylistRepository;
 import com.tunetown.repository.PlaylistSongsRepository;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class PlaylistService {
     @Resource
     PlaylistRepository playlistRepository;
@@ -26,7 +28,6 @@ public class PlaylistService {
     @Resource
     PlaylistSongsRepository playlistSongsRepository;
 
-    @Transactional
     public void addNewPlaylistToUser(int userId) {
         User user = userService.getUserById(userId);
 
@@ -37,6 +38,10 @@ public class PlaylistService {
 
         playlistRepository.save(playlist);
     }
+
+    /**
+     * Get playlist's information by playlistId
+     */
     public Playlist getPlaylistById(int playlistId) {
         Optional<Playlist> optionalPlaylist = playlistRepository.findById(playlistId);
         if(optionalPlaylist.isPresent())
@@ -64,23 +69,32 @@ public class PlaylistService {
     }
 
     @Transactional
-    public void modifyPlaylist(Playlist modifiedPlaylist) {
+    public void modifyPlaylist(Playlist modifiedPlaylist, List<PlaylistSongs> playlistSongsList) {
         Optional<Playlist> optionalPlaylist = playlistRepository.findById(modifiedPlaylist.getId());
+        log.info("playlistId: " + modifiedPlaylist.getId());
         if(optionalPlaylist.isPresent()) {
+            log.info("presented");
             Playlist dbPlaylist = optionalPlaylist.get();
 
+            // Setting basic information of Playlist
             dbPlaylist.setPlaylistName(modifiedPlaylist.getPlaylistName());
             dbPlaylist.setPlaylistType(modifiedPlaylist.getPlaylistType());
             dbPlaylist.setCoverArt(modifiedPlaylist.getCoverArt());
+
+            // Setting playlistSongs in Playlist
+            for(PlaylistSongs pSong : playlistSongsList) {
+                // if pSong has already added to playlist -> then modify the information
+                // else -> add new song to playlist
+                Optional<PlaylistSongs> optionalDbSong = playlistSongsRepository.findById(pSong.getId());
+                if(optionalDbSong.isPresent()) {
+                    PlaylistSongs dbSong = optionalDbSong.get();
+                    dbSong.setOrderSong(pSong.getOrderSong());
+                }
+                else {
+                    addSongToPlaylist(pSong.getSong().getId(), pSong.getPlaylist().getId());
+                }
+            }
         }
-    }
-
-    @Transactional
-    public void swapPlaylistSongsOrder(PlaylistSongs ps1, PlaylistSongs ps2) {
-        int tempOrder = ps1.getOrderSong();
-
-        ps1.setOrderSong(ps2.getOrderSong());
-        ps2.setOrderSong(tempOrder);
     }
 
     public void removePlaylistSongs(PlaylistSongs playlistSongs) {
