@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -38,12 +39,17 @@ public class SongController {
      * Get songs by numbers in each page using Paging Technique
      * @param page: Page number 1 for default
      * @param size: size of items each page
-     * @return
      */
     @GetMapping
-    public Page<Song> getAllSongs(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
-        PageRequest pageRequest = PageRequest.of(page, size);
-        return songService.getAllSongs(pageRequest);
+    public Map<String, Object> getAllSongs(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        Page<Song> songPage = songService.getAllSongs(pageRequest);
+        return Map.of(
+                "songList", songPage.getContent(),
+                "currentPage", songPage.getNumber() + 1,
+                "totalPages", songPage.getTotalPages(),
+                "totalElement", songPage.getTotalElements()
+        );
     }
 
     @PostMapping(path = "/addSong", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -64,7 +70,7 @@ public class SongController {
     @PutMapping(path = "/updateSong", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updateSong(@RequestParam("songId") int songId, @RequestBody Song song){
         Optional<Song> optionalSong = songRepository.getSongById(songId);
-        if (!optionalSong.isPresent()){
+        if (optionalSong.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + songId + " does not exists!");
         }
         Song oldSong = optionalSong.get();
