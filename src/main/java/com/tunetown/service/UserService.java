@@ -55,4 +55,8 @@ public class UserService {
         else
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user found with email " + userEmail);
     }
+
+    public List<User> getListUserByEmail(String email) {
+        return userRepository.getListUserByEmail(email);
+    }
 }

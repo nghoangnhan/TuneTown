@@ -19,7 +19,7 @@ public class Song {
     private int id;
     private String songName;
     private String poster;
-    @OneToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<User> artists;
     @OneToMany(fetch = FetchType.EAGER)
     private List<Genre> genres;
