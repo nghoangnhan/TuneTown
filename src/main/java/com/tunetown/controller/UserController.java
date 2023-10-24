@@ -22,4 +22,8 @@ public class UserController {
     public void addUser(@RequestBody User user) {
         userService.addUser(user);
     }
+    @GetMapping(path = "/getUsers")
+    public List<User> getUsersById(@RequestParam String email) {
+        return userService.getListUserByEmail(email);
+    }
 }
