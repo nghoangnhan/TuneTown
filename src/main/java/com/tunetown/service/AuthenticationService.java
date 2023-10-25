@@ -76,6 +76,11 @@ public class AuthenticationService {
 
         //return access_token
         String jwtToken = jwtService.generateToken(userDetails);
-        return AuthenticationResponse.builder().access_token(jwtToken).build();
+        return AuthenticationResponse.builder()
+                .access_token(jwtToken)
+                .id(dbUser.getId())
+                .userName(dbUser.getUserName())
+                .role(dbUser.getRole())
+                .build();
     }
 }
