@@ -37,7 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String userEmail;
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.info("authHear is null or not start with Bearer");
             filterChain.doFilter(request, response);
         }
         else {
