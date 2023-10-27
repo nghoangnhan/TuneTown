@@ -3,6 +3,7 @@ package com.tunetown.service;
 import com.tunetown.model.User;
 import com.tunetown.repository.UserRepository;
 import jakarta.annotation.Resource;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -58,5 +59,19 @@ public class UserService {
 
     public List<User> getListUserByEmail(String email) {
         return userRepository.getListUserByEmail(email);
+    }
+    @Transactional
+    public boolean modifyUserInformation(User modifiedUser) {
+        User dbUser = getUserById(modifiedUser.getId());
+        try {
+            dbUser.setUserName(modifiedUser.getUserName());
+            dbUser.setBirthDate(modifiedUser.getBirthDate());
+            dbUser.setAvatar(modifiedUser.getAvatar());
+            dbUser.setUserBio(modifiedUser.getUserBio());
+            return true;
+        } catch (Exception e){
+            log.error(e.getMessage());
+            return false;
+        }
     }
 }
