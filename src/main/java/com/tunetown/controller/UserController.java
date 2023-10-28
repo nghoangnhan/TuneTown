@@ -30,7 +30,7 @@ public class UserController {
             return Map.of("users", userService.getAllUsers());
         return Map.of("user", userService.getUserById(userId));
     }
-    @PutMapping
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> modifyUserInformation(@RequestBody User user) {
         boolean isModified = userService.modifyUserInformation(user);
         if(isModified)
