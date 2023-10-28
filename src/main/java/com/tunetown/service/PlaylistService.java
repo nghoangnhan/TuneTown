@@ -100,4 +100,19 @@ public class PlaylistService {
     public void removePlaylistSongs(PlaylistSongs playlistSongs) {
         playlistSongsRepository.delete(playlistSongs);
     }
+
+    public boolean deletePlaylist(int playlistId) {
+        Playlist playlist = getPlaylistById(playlistId);
+        try {
+            List<PlaylistSongs> playlistSongsList = getPlaylistSongsById(playlistId);
+            for(PlaylistSongs ps : playlistSongsList) {
+                removePlaylistSongs(ps);
+            }
+            playlistRepository.delete(playlist);
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
+    }
 }

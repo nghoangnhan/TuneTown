@@ -3,11 +3,13 @@ package com.tunetown.controller;
 import com.tunetown.model.Playlist;
 import com.tunetown.model.PlaylistSongs;
 import com.tunetown.service.PlaylistService;
-import com.tunetown.service.PlaylistSongsService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -21,6 +23,14 @@ public class PlaylistController {
     @GetMapping
     public List<Playlist> getAllPlaylistByUserId(@RequestParam int userId) {
         return playlistService.getAllPlaylistByUserId(userId);
+    }
+    @DeleteMapping
+    public ResponseEntity<String> deletePlaylist(@RequestParam int playlistId) {
+        boolean isDeleted = playlistService.deletePlaylist(playlistId);
+        if(isDeleted)
+            return ResponseEntity.ok("Removed from your Library");
+        else
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot removed playlist from your Library");
     }
 
     @PostMapping
