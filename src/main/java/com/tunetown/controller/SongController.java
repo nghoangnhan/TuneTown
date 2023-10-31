@@ -5,9 +5,7 @@ import com.tunetown.repository.SongRepository;
 import com.tunetown.service.FirebaseStorageService;
 import com.tunetown.service.SongService;
 import jakarta.annotation.Resource;
-import org.apache.commons.logging.Log;
 import org.springframework.data.domain.Page;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/songs")
@@ -48,6 +48,10 @@ public class SongController {
                 "totalElement", songPage.getTotalElements()
         );
     }
+    @GetMapping("/getSongById")
+    public Song getSongById(@RequestParam int songId) {
+        return songService.getActiveSongById(songId);
+    }
 
     @PostMapping(path = "/addSong", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> addSong(@RequestBody Song song ){
@@ -56,7 +60,7 @@ public class SongController {
     }
 
     @PostMapping(path = "/addSongFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<String> addSong(@RequestBody MultipartFile poster, @RequestBody MultipartFile songData){
+    public List<String> addSong(@RequestParam(name = "poster") MultipartFile poster, @RequestParam(name = "songData") MultipartFile songData){
         List<String> listFile = new ArrayList<>();
         listFile.add(uploadImage(poster));
         listFile.add(uploadMp3(songData));
