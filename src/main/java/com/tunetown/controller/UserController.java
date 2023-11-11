@@ -40,7 +40,7 @@ public class UserController {
     }
 
     @GetMapping(path = "/getUsers")
-    public List<User> getUsersById(@RequestParam String email) {
+    public List<User> getUsersByEmail(@RequestParam String email) {
         return userService.getListUserByEmail(email);
     }
 }
