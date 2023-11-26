@@ -12,7 +12,7 @@ public class MailService {
         // Recipient's email ID needs to be mentioned.
 
         // Sender's email ID needs to be mentioned
-        String from = "bum.le.2k2@gmail.com";
+        String from = "thetunetownute@gmail.com";
 
         // Assuming you are sending email from through gmail smtp
         String host = "smtp.gmail.com";
@@ -33,7 +33,7 @@ public class MailService {
 
             protected PasswordAuthentication getPasswordAuthentication() {
                 //setup app password reference https://support.google.com/accounts/answer/185833?hl=en
-                return new PasswordAuthentication(from, "unnextvxrvlrzdvx");
+                return new PasswordAuthentication(from, "wlaq niqd awcq bski");
 
             }
 
