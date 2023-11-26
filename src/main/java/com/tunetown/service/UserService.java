@@ -74,4 +74,10 @@ public class UserService {
             return false;
         }
     }
+
+    @Transactional
+    public void switchUserRole(User user) {
+        User dbUser = getUserById(user.getId());
+        dbUser.setRole(user.getRole());
+    }
 }
