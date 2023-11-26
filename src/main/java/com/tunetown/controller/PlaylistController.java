@@ -20,10 +20,16 @@ public class PlaylistController {
     @Resource
     PlaylistService playlistService;
 
-    @GetMapping
+    @GetMapping("/getUserPlaylists")
     public List<Playlist> getAllPlaylistByUserId(@RequestParam int userId) {
         return playlistService.getAllPlaylistByUserId(userId);
     }
+
+    @GetMapping
+    public Playlist getPlaylistById(@RequestParam int playlistId) {
+        return playlistService.getPlaylistById(playlistId);
+    }
+
     @DeleteMapping
     public ResponseEntity<String> deletePlaylist(@RequestParam int playlistId) {
         boolean isDeleted = playlistService.deletePlaylist(playlistId);
