@@ -97,7 +97,20 @@ public class PlaylistService {
         }
     }
 
+    @Transactional
     public void removePlaylistSongs(PlaylistSongs playlistSongs) {
+        boolean isAfterDeletedSong = false;
+
+        List<PlaylistSongs> playlistSongsList = getPlaylistSongsById(playlistSongs.getPlaylist().getId());
+        for (PlaylistSongs song: playlistSongsList) {
+            if(isAfterDeletedSong) {
+                log.info(song.getId() + " is after deleted song");
+                song.setOrderSong(song.getOrderSong() - 1);
+            }
+            else if(song.getId() == playlistSongs.getId())
+                isAfterDeletedSong = true;
+        }
+        playlistSongsRepository.saveAll(playlistSongsList);
         playlistSongsRepository.delete(playlistSongs);
     }
 

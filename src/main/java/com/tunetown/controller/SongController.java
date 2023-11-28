@@ -6,9 +6,7 @@ import com.tunetown.service.FirebaseStorageService;
 import com.tunetown.service.SongService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.Log;
 import org.springframework.data.domain.Page;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,9 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/songs")
@@ -45,6 +45,10 @@ public class SongController {
                 "totalPages", songPage.getTotalPages(),
                 "totalElement", songPage.getTotalElements()
         );
+    }
+    @GetMapping("/getSongById")
+    public Song getSongById(@RequestParam int songId) {
+        return songService.getActiveSongById(songId);
     }
 
     @PostMapping(path = "/addSong", consumes = MediaType.APPLICATION_JSON_VALUE)

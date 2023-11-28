@@ -39,8 +39,18 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Modify unsuccessfully");
     }
 
+    @PutMapping("/switchUserRole")
+    public ResponseEntity<String> switchUserRole(@RequestBody User user) {
+        try {
+            userService.switchUserRole(user);
+            return ResponseEntity.ok("Switched user role into: " + user.getRole());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
     @GetMapping(path = "/getUsers")
-    public List<User> getUsersById(@RequestParam String email) {
+    public List<User> getUsersByEmail(@RequestParam String email) {
         return userService.getListUserByEmail(email);
     }
 }

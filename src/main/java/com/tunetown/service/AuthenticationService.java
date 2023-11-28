@@ -5,6 +5,7 @@ import com.tunetown.model.authentication.AuthenticationResponse;
 import com.tunetown.model.authentication.RegisterRequest;
 import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -82,5 +83,10 @@ public class AuthenticationService {
                 .userName(dbUser.getUserName())
                 .role(dbUser.getRole())
                 .build();
+}
+    @Transactional
+    public void changePassword(String email, String newPassword) {
+        com.tunetown.model.User dbUser = userService.getActiveUserByEmail(email);
+        dbUser.setPassword(passwordEncoder.encode(newPassword));
     }
 }
