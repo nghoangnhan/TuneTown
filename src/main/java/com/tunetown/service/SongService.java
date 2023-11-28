@@ -26,6 +26,9 @@ public class SongService {
     @Resource
     JwtService jwtService;
 
+    @Resource
+    UserService userService;
+
     /**
      * Get all songs that status = 1 (Enabled) by Paging Technique
      * @return
@@ -57,12 +60,13 @@ public class SongService {
         Song deletedSong = getActiveSongById(id);
         String token = accessToken.substring(6, accessToken.length());
         String userEmail = jwtService.extractUserEmail(token.toString());
+        User currentUser = userService.getActiveUserByEmail(userEmail);
 
         boolean isArtist = false;
 
         for (User user: deletedSong.getArtists()
              ) {
-            if(userEmail.equals(user.getEmail())){
+            if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
                 isArtist = true;
                 break;
             }
@@ -90,12 +94,12 @@ public class SongService {
         Song songUpdate = optionalSong.get();
         String token = accessToken.substring(6, accessToken.length());
         String userEmail = jwtService.extractUserEmail(token.toString());
+        User currentUser = userService.getActiveUserByEmail(userEmail);
 
         boolean isArtist = false;
 
-        for (User user: songUpdate.getArtists()
-        ) {
-            if(userEmail.equals(user.getEmail())){
+        for (User user: songUpdate.getArtists()) {
+            if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
                 isArtist = true;
                 break;
             }
