@@ -15,6 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +47,8 @@ public class AuthenticationService {
         dbUser.setPassword(request.getPassword());
         dbUser.setBirthDate(request.getBirthDate());
         dbUser.setRole("USER");
+        dbUser.setAvatar(request.getAvatar());
+        dbUser.setMethod(request.getMethod());
         userService.addUser(dbUser);
 
         // Return access_token after save new user
@@ -88,5 +92,19 @@ public class AuthenticationService {
     public void changePassword(String email, String newPassword) {
         com.tunetown.model.User dbUser = userService.getActiveUserByEmail(email);
         dbUser.setPassword(passwordEncoder.encode(newPassword));
+    }
+
+    public boolean checkEmailExisted(String userEmail){
+        List<com.tunetown.model.User> listUser = userService.getAllUsers();
+        boolean isExisted = false;
+
+        for (com.tunetown.model.User user: listUser
+        ) {
+            if(userEmail.equals(user.getEmail())){
+                isExisted = true;
+                break;
+            }
+        }
+        return isExisted;
     }
 }

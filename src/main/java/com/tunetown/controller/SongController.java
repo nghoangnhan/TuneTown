@@ -60,10 +60,21 @@ public class SongController {
     }
 
     @PostMapping(path = "/addSongFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<String> addSong(@RequestParam(name = "poster") MultipartFile poster, @RequestParam(name = "songData") MultipartFile songData){
+    public List<String> addSong(@RequestBody MultipartFile poster, @RequestBody MultipartFile songData){
         List<String> listFile = new ArrayList<>();
-        listFile.add(uploadImage(poster));
-        listFile.add(uploadMp3(songData));
+        if(firebaseStorageService.checkValidImage(poster)){
+            listFile.add(uploadImage(poster));
+        }
+        else{
+            throw new RuntimeException("Invalid image");
+        }
+
+        if(firebaseStorageService.checkValidMp3(songData)){
+            listFile.add(uploadMp3(songData));
+        }
+        else{
+            throw new RuntimeException("Invalid mp3 file");
+        }
         return listFile;
     }
 

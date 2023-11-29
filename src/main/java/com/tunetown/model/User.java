@@ -32,4 +32,5 @@ public class User {
     private List<Genre> favoriteGenres;
     @OneToMany(fetch = FetchType.LAZY)
     private List<User> followingArtists;
+    private String method;
 }
