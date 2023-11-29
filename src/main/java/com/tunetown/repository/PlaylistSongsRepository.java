@@ -11,7 +11,7 @@ public interface PlaylistSongsRepository extends JpaRepository<PlaylistSongs, In
     @Query("SELECT COUNT(ps) FROM PlaylistSongs ps WHERE ps.playlist.id = ?1")
     int getNumberOfSongsInPlaylist(int playlistId);
 
-    @Query("SELECT ps FROM PlaylistSongs  ps where ps.playlist.id = ?1")
+    @Query("SELECT ps FROM PlaylistSongs  ps where ps.playlist.id = ?1 ORDER BY ps.orderSong")
     List<PlaylistSongs> getPlaylistSongsById(int playlistId);
 
     @Query("SELECT ps FROM PlaylistSongs  ps WHERE ps.song.id = ?1 AND ps.playlist.id = ?2")
