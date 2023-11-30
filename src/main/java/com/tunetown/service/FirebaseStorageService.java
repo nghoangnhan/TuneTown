@@ -8,7 +8,6 @@ import com.google.firebase.cloud.StorageClient;
 import com.tunetown.config.FirebaseConfig;
 import com.tunetown.repository.SongRepository;
 import jakarta.annotation.Resource;
-import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -139,41 +138,5 @@ public class FirebaseStorageService {
             // Handle any other exception
             throw new RuntimeException(e);
         }
-    }
-
-    public boolean checkValidImage(MultipartFile imgFile){
-        try {
-            InputStream contentFile = imgFile.getInputStream();
-
-            Tika tika = new Tika();
-
-            // Detect the content type of the file
-            String contentType = tika.detect(contentFile);
-
-            if (contentType.equals("image/png") || contentType.equals("image/jpeg")) {
-                return true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean checkValidMp3(MultipartFile mp3File){
-        try {
-            InputStream contentFile = mp3File.getInputStream();
-
-            Tika tika = new Tika();
-
-            // Detect the content type of the file
-            String contentType = tika.detect(contentFile);
-
-            if (contentType.equals("audio/mpeg")) {
-                return true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 }

@@ -64,22 +64,21 @@ public class SongController {
      * @return
      */
     @PostMapping(path = "/addSongFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<String> addSong(@RequestBody MultipartFile poster, @RequestBody MultipartFile songData){
+    public List<String> addSong(@RequestBody MultipartFile poster, @RequestBody MultipartFile songData) throws IOException {
         List<String> listFile = new ArrayList<>();
-        if(firebaseStorageService.checkValidImage(poster)){
-            listFile.add(uploadImage(poster));
+        List<String> errorMessage = new ArrayList<>();
+        errorMessage.add("Invalid file type upload!");
+        if(firebaseController.checkValidImageFile(poster)){
+            listFile.add(firebaseController.uploadImage(poster));
         }
-        else{
-            throw new RuntimeException("Invalid image");
+        else return errorMessage;
+        if(firebaseController.checkValidMp3File(songData)){
+            listFile.add(firebaseController.uploadMp3(songData));
         }
+        else return errorMessage;
+        return listFile;
+    }
 
-        if(firebaseStorageService.checkValidMp3(songData)){
-            listFile.add(uploadMp3(songData));
-        }
-        else{
-            throw new RuntimeException("Invalid mp3 file");
-        }
-   
     @DeleteMapping(path = "/deleteSong")
     public ResponseEntity<String> deleteSong(@RequestParam("songId") int songId, @RequestHeader("Authorization") String accessToken){
         if (accessToken == null || accessToken.isEmpty()) {
