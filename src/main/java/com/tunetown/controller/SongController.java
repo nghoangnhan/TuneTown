@@ -70,14 +70,14 @@ public class SongController {
             listFile.add(uploadImage(poster));
         }
         else{
-            throw new RuntimeException("Invalid image! Image size > 1MB or the file type is not PNG or JPEG");
+            throw new RuntimeException("Invalid image");
         }
 
         if(firebaseStorageService.checkValidMp3(songData)){
             listFile.add(uploadMp3(songData));
         }
         else{
-            throw new RuntimeException("Invalid MP3 file! MP3 file size > 10MB or the file type is not MP3");
+            throw new RuntimeException("Invalid mp3 file");
         }
    
     @DeleteMapping(path = "/deleteSong")
