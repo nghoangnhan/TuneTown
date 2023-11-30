@@ -5,7 +5,6 @@ import com.tunetown.repository.SongRepository;
 import com.tunetown.service.FirebaseStorageService;
 import com.tunetown.service.SongService;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -23,12 +22,15 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/songs")
-@Slf4j
 public class SongController {
     @Resource
     SongService songService;
+
     @Resource
-    FirebaseController firebaseController;
+    SongRepository songRepository;
+
+    @Resource
+    FirebaseStorageService firebaseStorageService;
 
     /**
      * Get songs by numbers in each page using Paging Technique
@@ -57,51 +59,28 @@ public class SongController {
         return ResponseEntity.ok("Song added successfully");
     }
 
-    /**
-     * Upload poster and data on firebase and get data string
-     * @param poster
-     * @param songData
-     * @return
-     */
     @PostMapping(path = "/addSongFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<String> addSong(@RequestBody MultipartFile poster, @RequestBody MultipartFile songData) throws IOException {
+    public List<String> addSong(@RequestParam(name = "poster") MultipartFile poster, @RequestParam(name = "songData") MultipartFile songData){
         List<String> listFile = new ArrayList<>();
-        List<String> errorMessage = new ArrayList<>();
-        errorMessage.add("Invalid file type upload!");
-        if(firebaseController.checkValidImageFile(poster)){
-            listFile.add(firebaseController.uploadImage(poster));
-        }
-        else return errorMessage;
-        if(firebaseController.checkValidMp3File(songData)){
-            listFile.add(firebaseController.uploadMp3(songData));
-        }
-        else return errorMessage;
+        listFile.add(uploadImage(poster));
+        listFile.add(uploadMp3(songData));
         return listFile;
     }
 
     @DeleteMapping(path = "/deleteSong")
-    public ResponseEntity<String> deleteSong(@RequestParam("songId") int songId, @RequestHeader("Authorization") String accessToken){
-        if (accessToken == null || accessToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Access token is missing");
-        }
-        boolean isDeleted = songService.deleteSong(songId, accessToken);
-        if(isDeleted){
-            return ResponseEntity.ok("Song deleted successfully");
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete song, you are not the artist!");
+    public ResponseEntity<String> deleteSong(@RequestParam("songId") int songId){
+        songService.deleteSong(songId);
+        return ResponseEntity.ok("Song deleted successfully");
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateSong(@RequestBody Song song, @RequestHeader("Authorization") String accessToken){
-        if (accessToken == null || accessToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Access token is missing");
+    @PutMapping(path = "/updateSong", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> updateSong(@RequestParam("songId") int songId, @RequestBody Song song){
+        Optional<Song> optionalSong = songRepository.getSongById(songId);
+        if (optionalSong.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + songId + " does not exists!");
         }
-
-        boolean isUpdated = songService.updateSong(song, accessToken);
-        if(isUpdated){
-            return ResponseEntity.ok("Song updated successfully");
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update song, you are not the artist!");
+        songService.updateSong(song);
+        return ResponseEntity.ok("Song updated successfully");
     }
 
 
@@ -111,9 +90,31 @@ public class SongController {
         return listSong;
     }
 
-    @GetMapping(path = "/getSongById")
-    public Song getSongById(@RequestParam("songId") int id){
-        Song song = songService.getActiveSongById(id);
-        return song;
+
+    /**
+     * Get Image from filePath on computer and upload to FirebaseStorage
+     * @return
+     */
+    public String uploadImage(MultipartFile poster) {
+        String fileName = poster.getOriginalFilename();
+        try {
+            return firebaseStorageService.uploadImage(poster, fileName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * Get Mp3 data from filePath on computer and upload to FirebaseStorage
+     * @return
+     */
+    public String uploadMp3(MultipartFile songData) {
+        String fileName = songData.getOriginalFilename();
+        try {
+            return firebaseStorageService.uploadMp3(songData, fileName, 10);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
