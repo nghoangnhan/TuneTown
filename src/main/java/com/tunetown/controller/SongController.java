@@ -60,27 +60,43 @@ public class SongController {
     }
 
     @PostMapping(path = "/addSongFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<String> addSong(@RequestParam(name = "poster") MultipartFile poster, @RequestParam(name = "songData") MultipartFile songData){
+    public List<String> addSong(@RequestBody MultipartFile poster, @RequestBody MultipartFile songData){
         List<String> listFile = new ArrayList<>();
-        listFile.add(uploadImage(poster));
-        listFile.add(uploadMp3(songData));
-        return listFile;
+        if(firebaseStorageService.checkValidImage(poster)){
+            listFile.add(uploadImage(poster));
+        }
+        else{
+            throw new RuntimeException("Invalid image! Image size > 1MB or the file type is not PNG or JPEG");
+        }
+
+        if(firebaseStorageService.checkValidMp3(songData)){
+            listFile.add(uploadMp3(songData));
+        }
+        else{
+            throw new RuntimeException("Invalid MP3 file! MP3 file size > 10MB or the file type is not MP3");
+        }
     }
 
     @DeleteMapping(path = "/deleteSong")
-    public ResponseEntity<String> deleteSong(@RequestParam("songId") int songId){
-        songService.deleteSong(songId);
-        return ResponseEntity.ok("Song deleted successfully");
+    public ResponseEntity<String> deleteSong(@RequestParam("songId") int songId, @RequestHeader("Authorization") String accessToken){
+        if(accessToken.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token is missing!");
+        }
+        if(songService.deleteSong(songId, accessToken)){
+            return ResponseEntity.ok("Song deleted successfully");
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not the artist!");
     }
 
-    @PutMapping(path = "/updateSong", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateSong(@RequestParam("songId") int songId, @RequestBody Song song){
-        Optional<Song> optionalSong = songRepository.getSongById(songId);
-        if (optionalSong.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + songId + " does not exists!");
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> updateSong(@RequestBody Song song, @RequestHeader("Authorization") String accessToken){
+        if(accessToken.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token is missing!");
         }
-        songService.updateSong(song);
-        return ResponseEntity.ok("Song updated successfully");
+        if(songService.updateSong(song, accessToken)){
+            return ResponseEntity.ok("Song updated successfully");
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not the artist!");
     }
 
 
