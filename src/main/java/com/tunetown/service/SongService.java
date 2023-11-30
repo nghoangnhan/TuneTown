@@ -1,33 +1,28 @@
 package com.tunetown.service;
 
-
+import com.tunetown.config.FirebaseConfig;
 import com.tunetown.model.Song;
-import com.tunetown.model.User;
 import com.tunetown.repository.SongRepository;
-import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
-@Slf4j
 public class SongService {
 
     @Resource
     SongRepository songRepository;
 
     @Resource
-    JwtService jwtService;
-
-    @Resource
-    UserService userService;
+    FirebaseConfig firebaseConfig;
 
     /**
      * Get all songs that status = 1 (Enabled) by Paging Technique
@@ -51,32 +46,10 @@ public class SongService {
      * Use Soft Delete to set deletedSong status to 0 (Disabled) instead of delete song
      * @param id
      */
-    public boolean deleteSong(int id, String accessToken){
-        Optional<Song> optionalSong = songRepository.findById(id);
-        if (optionalSong.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + optionalSong.get().getId() + " does not exists!");
-        }
-
+    public void deleteSong(int id){
         Song deletedSong = getActiveSongById(id);
-        String token = accessToken.substring(6, accessToken.length());
-        String userEmail = jwtService.extractUserEmail(token.toString());
-        User currentUser = userService.getActiveUserByEmail(userEmail);
-
-        boolean isArtist = false;
-
-        for (User user: deletedSong.getArtists()
-             ) {
-            if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
-                isArtist = true;
-                break;
-            }
-        }
-        if (isArtist){
-            deletedSong.setStatus(0);
-            songRepository.save(deletedSong);
-            return true;
-        }
-        return false;
+        deletedSong.setStatus(0);
+        songRepository.save(deletedSong);
     }
 
     /**
@@ -85,68 +58,49 @@ public class SongService {
      * @param song: Get from JSON_VALUE
      */
     @Transactional
-    public boolean updateSong(Song song, String accessToken){
+    public void updateSong(Song song){
         Optional<Song> optionalSong = songRepository.findById(song.getId());
-        if (optionalSong.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + song.getId() + " does not exists!");
-        }
-
         Song songUpdate = optionalSong.get();
-        String token = accessToken.substring(6, accessToken.length());
-        String userEmail = jwtService.extractUserEmail(token.toString());
-        User currentUser = userService.getActiveUserByEmail(userEmail);
 
-        boolean isArtist = false;
+        String name = song.getSongName();
+        String poster = song.getPoster();
+        String data = song.getSongData();
+        Integer listens = song.getListens();
+        Integer likes = song.getLikes();
+        Integer status = song.getStatus();
 
-        for (User user: songUpdate.getArtists()) {
-            if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
-                isArtist = true;
-                break;
-            }
+
+        // Check valid before update
+        if(name != null && name.length() > 0 && !Objects.equals(songUpdate.getSongName(), name)) // Check the new name != current name
+        {
+            songUpdate.setSongName(name);
         }
-        if (isArtist){
-            String name = song.getSongName();
-            String poster = song.getPoster();
-            String data = song.getSongData();
-            Integer listens = song.getListens();
-            Integer likes = song.getLikes();
-            Integer status = song.getStatus();
 
-
-            // Check valid before update
-            if(name != null && name.length() > 0 && !Objects.equals(songUpdate.getSongName(), name)) // Check the new name != current name
-            {
-                songUpdate.setSongName(name);
-            }
-
-            if(poster != null && poster.length() > 0 && !Objects.equals(songUpdate.getPoster(), poster)) // Check the new poster != current poster
-            {
-                songUpdate.setPoster(poster);
-            }
-
-            if(data != null && data.length() > 0 && !Objects.equals(songUpdate.getSongData(), data)) // Check the new data != current data
-            {
-                songUpdate.setSongData(data);
-            }
-
-            if(listens != null && !Objects.equals(songUpdate.getListens(), listens)) // Check the new listens != current listens
-            {
-                songUpdate.setListens(listens);
-            }
-
-            if(likes != null && !Objects.equals(songUpdate.getLikes(), likes)) // Check the new likes != current likes
-            {
-                songUpdate.setLikes(likes);
-            }
-
-            if(status != null && !Objects.equals(songUpdate.getStatus(), status)) // Check the new likes != current likes
-            {
-                songUpdate.setStatus(status);
-            }
-            songRepository.save(songUpdate);
-            return true;
+        if(poster != null && poster.length() > 0 && !Objects.equals(songUpdate.getPoster(), poster)) // Check the new poster != current poster
+        {
+            songUpdate.setPoster(poster);
         }
-        return false;
+
+        if(data != null && data.length() > 0 && !Objects.equals(songUpdate.getSongData(), data)) // Check the new data != current data
+        {
+            songUpdate.setSongData(data);
+        }
+
+        if(listens != null && !Objects.equals(songUpdate.getListens(), listens)) // Check the new listens != current listens
+        {
+            songUpdate.setListens(listens);
+        }
+
+        if(likes != null && !Objects.equals(songUpdate.getLikes(), likes)) // Check the new likes != current likes
+        {
+            songUpdate.setLikes(likes);
+        }
+
+        if(status != null && !Objects.equals(songUpdate.getStatus(), status)) // Check the new likes != current likes
+        {
+            songUpdate.setStatus(status);
+        }
+        songRepository.save(songUpdate);
     }
 
 
