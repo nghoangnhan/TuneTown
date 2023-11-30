@@ -66,14 +66,14 @@ public class SongController {
             listFile.add(uploadImage(poster));
         }
         else{
-            throw new RuntimeException("Invalid image");
+            throw new RuntimeException("Invalid image! Image size > 1MB or the file type is not PNG or JPEG");
         }
 
         if(firebaseStorageService.checkValidMp3(songData)){
             listFile.add(uploadMp3(songData));
         }
         else{
-            throw new RuntimeException("Invalid mp3 file");
+            throw new RuntimeException("Invalid MP3 file! MP3 file size > 10MB or the file type is not MP3");
         }
         return listFile;
     }

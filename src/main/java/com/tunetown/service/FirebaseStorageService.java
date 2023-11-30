@@ -8,6 +8,7 @@ import com.google.firebase.cloud.StorageClient;
 import com.tunetown.config.FirebaseConfig;
 import com.tunetown.repository.SongRepository;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,7 @@ import java.net.URLEncoder;
 import java.util.*;
 
 @Service
+@Slf4j
 public class FirebaseStorageService {
     @Resource
     FirebaseConfig firebaseConfig;
@@ -151,7 +153,10 @@ public class FirebaseStorageService {
             String contentType = tika.detect(contentFile);
 
             if (contentType.equals("image/png") || contentType.equals("image/jpeg")) {
-                return true;
+                if(contentFile.available() < 1000000) // Do not allow the image > 1MB
+                {
+                    return true;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -169,7 +174,10 @@ public class FirebaseStorageService {
             String contentType = tika.detect(contentFile);
 
             if (contentType.equals("audio/mpeg")) {
-                return true;
+                if(contentFile.available() < 10000000) // Do not allow the mp3 file > 10MB
+                {
+                    return true;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
