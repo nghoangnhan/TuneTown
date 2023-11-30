@@ -75,6 +75,7 @@ public class SongController {
         else{
             throw new RuntimeException("Invalid MP3 file! MP3 file size > 10MB or the file type is not MP3");
         }
+        return listFile;
     }
 
     @DeleteMapping(path = "/deleteSong")
