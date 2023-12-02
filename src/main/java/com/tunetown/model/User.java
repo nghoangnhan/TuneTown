@@ -26,11 +26,11 @@ public class User {
     private Date birthDate;
     private String userBio;
     private String avatar;
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Song> history;
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<Genre> favoriteGenres;
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<User> followingArtists;
+    @ElementCollection
+    private List<Integer> followingArtists;
+    @ElementCollection
+    private List<Integer> followedBy;
     private String method;
 }

@@ -3,7 +3,9 @@ package com.tunetown.service;
 import com.tunetown.config.FirebaseConfig;
 import com.tunetown.model.Song;
 import com.tunetown.model.User;
+import com.tunetown.model.UserHistory;
 import com.tunetown.repository.SongRepository;
+import com.tunetown.repository.UserHistoryRepository;
 import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,12 +26,12 @@ public class SongService {
 
     @Resource
     SongRepository songRepository;
-
     @Resource
     UserService userService;
-
     @Resource
     JwtService jwtService;
+    @Resource
+    UserHistoryRepository userHistoryRepository;
 
     /**
      * Get all songs that status = 1 (Enabled) by Paging Technique
@@ -182,5 +186,24 @@ public class SongService {
         else{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No result found!");
         }
+    }
+
+    /**
+     * Get the list of songs between a time period listened
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public List<Song> getTopSongByPeriod(LocalDateTime startTime, LocalDateTime endTime){
+        List<Song> topSongList = new ArrayList<>();
+
+        List<UserHistory> userHistoryList = userHistoryRepository.getTopSongByPeriod(startTime, endTime);
+
+        for (UserHistory userHistory: userHistoryList
+        ) {
+            topSongList.add(userHistory.getSong());
+        }
+
+        return topSongList;
     }
 }

@@ -15,10 +15,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/songs")
@@ -133,5 +138,29 @@ public class SongController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Group the songs in list by Id and count the time listened
+     * @param startString
+     * @param endString
+     * @return
+     */
+    @PostMapping("/getTopSong")
+    public Map<Integer, Long> getTopSongByPeriod(@RequestParam("startTime") String startString, @RequestParam("endTime") String endString){
+        // Convert to LocalDateTime before compare
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        // Get the start time of startDate
+        LocalDateTime startDate = LocalDate.parse(startString, formatter).atStartOfDay();
+        // Get the end time of endDate
+        LocalDateTime endDate = LocalDate.parse(endString, formatter).atTime(LocalTime.MAX);;
+
+        List<Song> topSongList = songService.getTopSongByPeriod(startDate, endDate);
+
+        // Count the number of times each song with the same ID was listened to
+        Map<Integer, Long> songCount = topSongList.stream()
+                .collect(Collectors.groupingBy(Song::getId, Collectors.counting()));
+
+        return songCount;
     }
 }
