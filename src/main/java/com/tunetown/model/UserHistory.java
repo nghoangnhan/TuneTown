@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -13,20 +15,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Song {
+public class UserHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private String songName;
-    private String poster;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<User> artists;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<Genre> genres;
-    private String songData;
-    private int likes;
-    private int listens;
-    private int status;
-
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User user;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Song song;
+    private LocalDateTime dateListen;
 }

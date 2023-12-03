@@ -28,4 +28,7 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
             "OR (CONCAT(a.userName, '', s.songName) LIKE %:songName%))")
     List<Song> findSongByNameOrArtist(String songName, String artistName);
 
+    @Query("SELECT s.id FROM Song s JOIN s.artists a WHERE a.id = ?1")
+    List<Integer> songListByArtist(int artistId);
+
 }
