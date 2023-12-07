@@ -91,8 +91,8 @@ public class UserController {
     }
 
     @PostMapping(path = "/getArtistDetail")
-    public Object[] getArtistDetail(@RequestParam("artistId") int artistId){
-        Object[] artistDetail = userService.getArtistDetail(artistId);
+    public Map<String, Object> getArtistDetail(@RequestParam("artistId") int artistId){
+        Map<String, Object> artistDetail = userService.getArtistDetail(artistId);
         return artistDetail;
     }
 

@@ -45,22 +45,21 @@ public class PlaylistSongsService {
         try {
             List<PlaylistSongs> playlistSongs = playlistSongsRepository.getPlaylistSongsById(playlistId);
             PlaylistSongs currentSong = playlistSongs.get(songOrder - 1);
-            PlaylistSongs anotherSong = playlistSongs.get(anotherSongOrder - 1);
 
             if(songOrder < anotherSongOrder){
                 currentSong.setOrderSong(anotherSongOrder);
                 playlistSongsRepository.save(currentSong);
-                anotherSong.setOrderSong(anotherSongOrder - 1);
 
-                List<PlaylistSongs> subList1 = playlistSongs.subList(songOrder, anotherSongOrder - 1);
+                List<PlaylistSongs> subList1 = playlistSongs.subList(songOrder, anotherSongOrder);
 
                 for (PlaylistSongs songSubList1 : subList1
                 ) {
                     songSubList1.setOrderSong(songSubList1.getOrderSong() - 1);
                     playlistSongsRepository.save(songSubList1);
                 }
-
+                log.info(String.valueOf(anotherSongOrder));
                 if(anotherSongOrder < playlistSongs.size()){
+                    log.info(String.valueOf(anotherSongOrder));
                     List<PlaylistSongs> subList2 = playlistSongs.subList(anotherSongOrder, playlistSongs.size()-1);
 
                     for (PlaylistSongs songSubList2 : subList2
