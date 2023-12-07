@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -197,20 +194,23 @@ public class UserService {
      * @param artistId
      * @return Object with information
      */
-    public Object[] getArtistDetail(int artistId){
+    public Map<String, Object> getArtistDetail(int artistId){
         Optional<User> optionalArtist = userRepository.findById(artistId);
-        if(!optionalArtist.isPresent()){
+        if(!optionalArtist.isPresent() || !optionalArtist.get().getRole().equals("ARTIST")){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
         }
 
         List<Object[]> artistDetailList = userRepository.getArtistDetail(artistId);
         List<Song> songList = songRepository.songListByArtist(artistId);
         Object[] artistDetails = artistDetailList.get(0);
-        artistDetails = Arrays.copyOf(artistDetails, artistDetails.length + 1);
 
-        artistDetails[artistDetails.length - 1] = songList;
+        Map<String, Object> artistInfo = new HashMap<>();
+        artistInfo.put("id", artistDetails[0]);
+        artistInfo.put("name", artistDetails[1]);
+        artistInfo.put("avatar", artistDetails[2]);
+        artistInfo.put("songs", songList);
 
-        return artistDetails;
+        return artistInfo;
     }
 
     public boolean deleteUser(int userId, String accessToken){
