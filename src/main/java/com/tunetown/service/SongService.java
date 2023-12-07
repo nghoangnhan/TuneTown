@@ -9,6 +9,7 @@ import com.tunetown.repository.UserHistoryRepository;
 import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class SongService {
 
     @Resource
@@ -68,13 +70,21 @@ public class SongService {
 
         boolean isArtist = false;
 
-        for (User user: deletedSong.getArtists()
-        ) {
-            if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
+        if(deletedSong.getArtists().isEmpty()){
+            if(currentUser.getRole().toUpperCase().equals("ADMIN")){
                 isArtist = true;
-                break;
             }
         }
+        else{
+            for (User user: deletedSong.getArtists()
+            ) {
+                if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
+                    isArtist = true;
+                    break;
+                }
+            }
+        }
+
         if (isArtist){
             deletedSong.setStatus(0);
             songRepository.save(deletedSong);
@@ -89,9 +99,9 @@ public class SongService {
      * @param song: Get from JSON_VALUE
      */
     @Transactional
-    public boolean updateSong(Song song, String accessToken){
+    public boolean updateSong(Song song, String accessToken) {
         Optional<Song> optionalSong = songRepository.findById(song.getId());
-        if (optionalSong.isEmpty()){
+        if (optionalSong.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + song.getId() + " does not exists!");
         }
 
@@ -102,10 +112,17 @@ public class SongService {
 
         boolean isArtist = false;
 
-        for (User user: songUpdate.getArtists()) {
-            if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
+        if(songUpdate.getArtists().isEmpty()){
+            if(currentUser.getRole().toUpperCase().equals("ADMIN")){
                 isArtist = true;
-                break;
+            }
+        }
+        else{
+            for (User user : songUpdate.getArtists()) {
+                if (userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")) {
+                    isArtist = true;
+                    break;
+                }
             }
         }
         if (isArtist){
@@ -118,32 +135,32 @@ public class SongService {
 
 
             // Check valid before update
-            if(name != null && name.length() > 0 && !Objects.equals(songUpdate.getSongName(), name)) // Check the new name != current name
+            if(name != null && name.length() > 0 && !Objects.equals(songUpdate.getSongName(), name))
             {
                 songUpdate.setSongName(name);
             }
 
-            if(poster != null && poster.length() > 0 && !Objects.equals(songUpdate.getPoster(), poster)) // Check the new poster != current poster
+            if(poster != null && poster.length() > 0 && !Objects.equals(songUpdate.getPoster(), poster))
             {
                 songUpdate.setPoster(poster);
             }
 
-            if(data != null && data.length() > 0 && !Objects.equals(songUpdate.getSongData(), data)) // Check the new data != current data
+            if(data != null && data.length() > 0 && !Objects.equals(songUpdate.getSongData(), data))
             {
                 songUpdate.setSongData(data);
             }
 
-            if(listens != null && !Objects.equals(songUpdate.getListens(), listens)) // Check the new listens != current listens
+            if(listens != null && !Objects.equals(songUpdate.getListens(), listens))
             {
                 songUpdate.setListens(listens);
             }
 
-            if(likes != null && !Objects.equals(songUpdate.getLikes(), likes)) // Check the new likes != current likes
+            if(likes != null && !Objects.equals(songUpdate.getLikes(), likes))
             {
                 songUpdate.setLikes(likes);
             }
 
-            if(status != null && !Objects.equals(songUpdate.getStatus(), status)) // Check the new likes != current likes
+            if(status != null && !Objects.equals(songUpdate.getStatus(), status))
             {
                 songUpdate.setStatus(status);
             }
