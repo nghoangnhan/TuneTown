@@ -17,10 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -211,16 +209,29 @@ public class SongService {
      * @param endTime
      * @return
      */
-    public List<Song> getTopSongByPeriod(LocalDateTime startTime, LocalDateTime endTime){
-        List<Song> topSongList = new ArrayList<>();
-
+    public List<Map<String, Object>> getTopSongByPeriod(LocalDateTime startTime, LocalDateTime endTime){
         List<UserHistory> userHistoryList = userHistoryRepository.getTopSongByPeriod(startTime, endTime);
 
-        for (UserHistory userHistory: userHistoryList
-        ) {
-            topSongList.add(userHistory.getSong());
+        Map<Song, Long> songCountMap = userHistoryList.stream()
+                .collect(Collectors.groupingBy(UserHistory::getSong, Collectors.counting()));
+
+        List<Map.Entry<Song, Long>> sortedEntries = new ArrayList<>(songCountMap.entrySet());
+        // Sort item by DESC
+        sortedEntries.sort(Map.Entry.<Song, Long>comparingByValue().reversed());
+
+        List<Map<String, Object>> top10SongList = new ArrayList<>();
+        int count = 0;
+        for (Map.Entry<Song, Long> entry : sortedEntries) {
+            if (count >= 10) {
+                break;
+            }
+            Map<String, Object> songInfo = new HashMap<>();
+            songInfo.put("song", entry.getKey());  // Key: The object song
+            songInfo.put("count", entry.getValue()); // Value: Listen count
+            top10SongList.add(songInfo);
+            count++;
         }
 
-        return topSongList;
+        return top10SongList;
     }
 }
