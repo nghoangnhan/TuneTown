@@ -147,7 +147,7 @@ public class SongController {
      * @return
      */
     @PostMapping("/getTopSong")
-    public Map<Integer, Long> getTopSongByPeriod(@RequestParam("startTime") String startString, @RequestParam("endTime") String endString){
+    public List<Map<String, Object>> getTopSongByPeriod(@RequestParam("startTime") String startString, @RequestParam("endTime") String endString){
         // Convert to LocalDateTime before compare
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         // Get the start time of startDate
@@ -155,12 +155,8 @@ public class SongController {
         // Get the end time of endDate
         LocalDateTime endDate = LocalDate.parse(endString, formatter).atTime(LocalTime.MAX);;
 
-        List<Song> topSongList = songService.getTopSongByPeriod(startDate, endDate);
+        List<Map<String, Object>> topSongList = songService.getTopSongByPeriod(startDate, endDate);
 
-        // Count the number of times each song with the same ID was listened to
-        Map<Integer, Long> songCount = topSongList.stream()
-                .collect(Collectors.groupingBy(Song::getId, Collectors.counting()));
-
-        return songCount;
+        return topSongList;
     }
 }

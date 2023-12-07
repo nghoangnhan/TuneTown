@@ -172,6 +172,9 @@ public class UserService {
             userHistory.setSong(song);
             userHistory.setDateListen(LocalDateTime.now());
             userHistoryRepository.save(userHistory);
+
+            song.setListens(song.getListens() + 1);
+            songRepository.save(song);
             return true;
         } catch (Exception e){
             log.error(e.getMessage());
