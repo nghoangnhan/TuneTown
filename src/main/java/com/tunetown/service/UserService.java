@@ -1,11 +1,8 @@
 package com.tunetown.service;
 
-import com.tunetown.model.Song;
-import com.tunetown.model.User;
-import com.tunetown.model.UserHistory;
-import com.tunetown.repository.SongRepository;
-import com.tunetown.repository.UserHistoryRepository;
-import com.tunetown.repository.UserRepository;
+import com.tunetown.model.*;
+import com.tunetown.repository.*;
+import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
@@ -31,6 +28,12 @@ public class UserService {
     UserHistoryRepository userHistoryRepository;
     @Resource
     SongRepository songRepository;
+    @Resource
+    JwtService jwtService;
+    @Resource
+    PlaylistSongsRepository playlistSongsRepository;
+    @Resource
+    PlaylistRepository playlistRepository;
 
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -201,12 +204,81 @@ public class UserService {
         }
 
         List<Object[]> artistDetailList = userRepository.getArtistDetail(artistId);
-        List<Integer> songIdList = songRepository.songListByArtist(artistId);
+        List<Song> songList = songRepository.songListByArtist(artistId);
         Object[] artistDetails = artistDetailList.get(0);
         artistDetails = Arrays.copyOf(artistDetails, artistDetails.length + 1);
 
-        artistDetails[artistDetails.length - 1] = songIdList;
+        artistDetails[artistDetails.length - 1] = songList;
 
         return artistDetails;
+    }
+
+    public boolean deleteUser(int userId, String accessToken){
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (!optionalUser.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
+        }
+
+        try{
+            String token = accessToken.substring(6, accessToken.length());
+            String userEmail = jwtService.extractUserEmail(token.toString());
+            User currentUser = getActiveUserByEmail(userEmail);
+
+            if(!currentUser.getRole().equals("ADMIN")){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not the admin!");
+            }
+
+            // Delete all the song of user relevant
+            List<Song> songList = songRepository.songListByArtist(userId);
+            if(!songList.isEmpty()){
+                for (Song song : songList
+                     ) {
+                    song.setStatus(0);
+                    songRepository.save(song);
+                }
+            }
+
+            // Delete all the playlist of user relevant
+            List<Playlist> playlistList = playlistRepository.getAllPlaylistsByUserId(userId);
+            if(!playlistList.isEmpty()){
+                for (Playlist playlist : playlistList
+                     ) {
+                    List<PlaylistSongs> playlistSongsList = playlistSongsRepository.getPlaylistSongsById(playlist.getId());
+                    if(!playlistSongsList.isEmpty()){
+                        for (PlaylistSongs playlistSong : playlistSongsList
+                             ) {
+                            playlistSongsRepository.delete(playlistSong);
+                        }
+                    }
+                    playlistRepository.delete(playlist);
+                }
+            }
+
+            // Delete all user listen history
+            List<UserHistory> userHistoryList = userHistoryRepository.getHistoryByUserId(userId);
+            if(!userHistoryList.isEmpty()){
+                for (UserHistory userHistory : userHistoryList
+                     ) {
+                    userHistoryRepository.delete(userHistory);
+                }
+            }
+
+            // Remove from list followedBy of artist
+            List<User> userList = userRepository.findAll();
+            for (User user : userList
+                 ) {
+                if(!user.getFollowedBy().isEmpty()){
+                    user.getFollowedBy().removeIf(artistId -> artistId.equals(userId));
+                    user.setFollowedBy(user.getFollowedBy());
+                    userRepository.save(user);
+                }
+            }
+
+            userRepository.delete(optionalUser.get());
+            return true;
+        } catch (Exception e){
+            log.error(e.getMessage());
+        }
+        return false;
     }
 }

@@ -95,4 +95,15 @@ public class UserController {
         Object[] artistDetail = userService.getArtistDetail(artistId);
         return artistDetail;
     }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteUser(@RequestParam("userId") int userId, @RequestHeader("Authorization") String accessToken){
+        if(accessToken.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token is missing!");
+        }
+        if(userService.deleteUser(userId, accessToken)){
+            return ResponseEntity.ok("Delete user successfully!");
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not the admin!");
+    }
 }

@@ -26,8 +26,6 @@ public class User {
     private Date birthDate;
     private String userBio;
     private String avatar;
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<Genre> favoriteGenres;
     @ElementCollection
     private List<Integer> followingArtists;
     @ElementCollection
