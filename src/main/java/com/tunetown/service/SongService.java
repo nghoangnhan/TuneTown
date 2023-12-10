@@ -1,9 +1,11 @@
 package com.tunetown.service;
 
 import com.tunetown.config.FirebaseConfig;
+import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
 import com.tunetown.model.User;
 import com.tunetown.model.UserHistory;
+import com.tunetown.repository.GenreRepository;
 import com.tunetown.repository.SongRepository;
 import com.tunetown.repository.UserHistoryRepository;
 import com.tunetown.service.jwt.JwtService;
@@ -32,6 +34,8 @@ public class SongService {
     JwtService jwtService;
     @Resource
     UserHistoryRepository userHistoryRepository;
+    @Resource
+    GenreRepository genreRepository;
 
     /**
      * Get all songs that status = 1 (Enabled) by Paging Technique
@@ -233,5 +237,10 @@ public class SongService {
         }
 
         return top10SongList;
+    }
+
+    public List<Genre> getAllGenres(){
+        List<Genre> genreList = genreRepository.getAllGenres();
+        return genreList;
     }
 }

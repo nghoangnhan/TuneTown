@@ -1,5 +1,6 @@
 package com.tunetown.controller;
 
+import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
 import com.tunetown.repository.SongRepository;
 import com.tunetown.service.FirebaseStorageService;
@@ -158,5 +159,11 @@ public class SongController {
         List<Map<String, Object>> topSongList = songService.getTopSongByPeriod(startDate, endDate);
 
         return topSongList;
+    }
+
+    @GetMapping("/getAllGenres")
+    public List<Genre> getALlGenres(){
+        List<Genre> genreList = songService.getAllGenres();
+        return genreList;
     }
 }
