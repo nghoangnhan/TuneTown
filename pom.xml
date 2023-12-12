@@ -11,7 +11,6 @@
 	<groupId>com</groupId>
 	<artifactId>tunetown</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
 	<name>tunetown</name>
 	<description>TuneTown project</description>
 	<properties>
