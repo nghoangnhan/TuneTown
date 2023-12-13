@@ -51,7 +51,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        List<String> allowedOrigins = Arrays.asList("http://localhost:5173", "https://tunetown-ute.vercel.app/");
+        List<String> allowedOrigins = Arrays.asList("http://localhost:5173", "https://tunetown-ute.vercel.app/", "https://tunetown.netlify.app/");
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
