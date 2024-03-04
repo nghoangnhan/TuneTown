@@ -23,6 +23,6 @@ public class FirebaseController {
 
     @PostMapping(path = "/uploadMp3", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String uploadMp3(@RequestParam(name = "mp3File") MultipartFile mp3File) throws IOException {
-        return firebaseStorageService.uploadMp3(mp3File, mp3File.getOriginalFilename(), 10);
+        return firebaseStorageService.uploadMp3(mp3File, mp3File.getOriginalFilename());
     }
 }

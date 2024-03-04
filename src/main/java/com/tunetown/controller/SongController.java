@@ -23,8 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/songs")
@@ -109,14 +107,12 @@ public class SongController {
 
     @PostMapping(path = "/findSong")
     public List<Song> findSong(@RequestParam("name") String name){
-        List<Song> listSong = songService.findSongByNameOrArtist(name);
-        return listSong;
+        return songService.findSongByNameOrArtist(name);
     }
 
 
     /**
      * Get Image from filePath on computer and upload to FirebaseStorage
-     * @return
      */
     public String uploadImage(MultipartFile poster) {
         String fileName = poster.getOriginalFilename();
@@ -130,12 +126,11 @@ public class SongController {
 
     /**
      * Get Mp3 data from filePath on computer and upload to FirebaseStorage
-     * @return
      */
     public String uploadMp3(MultipartFile songData) {
         String fileName = songData.getOriginalFilename();
         try {
-            return firebaseStorageService.uploadMp3(songData, fileName, 10);
+            return firebaseStorageService.uploadMp3(songData, fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -143,9 +138,6 @@ public class SongController {
 
     /**
      * Group the songs in list by Id and count the time listened
-     * @param startString
-     * @param endString
-     * @return
      */
     @PostMapping("/getTopSong")
     public List<Map<String, Object>> getTopSongByPeriod(@RequestParam("startTime") String startString, @RequestParam("endTime") String endString){
@@ -154,16 +146,13 @@ public class SongController {
         // Get the start time of startDate
         LocalDateTime startDate = LocalDate.parse(startString, formatter).atStartOfDay();
         // Get the end time of endDate
-        LocalDateTime endDate = LocalDate.parse(endString, formatter).atTime(LocalTime.MAX);;
+        LocalDateTime endDate = LocalDate.parse(endString, formatter).atTime(LocalTime.MAX);
 
-        List<Map<String, Object>> topSongList = songService.getTopSongByPeriod(startDate, endDate);
-
-        return topSongList;
+        return songService.getTopSongByPeriod(startDate, endDate);
     }
 
     @GetMapping("/getAllGenres")
     public List<Genre> getALlGenres(){
-        List<Genre> genreList = songService.getAllGenres();
-        return genreList;
+        return songService.getAllGenres();
     }
 }
