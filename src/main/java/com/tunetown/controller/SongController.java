@@ -2,7 +2,6 @@ package com.tunetown.controller;
 
 import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
-import com.tunetown.repository.SongRepository;
 import com.tunetown.service.FirebaseStorageService;
 import com.tunetown.service.SongService;
 import jakarta.annotation.Resource;
@@ -29,9 +28,6 @@ import java.util.Map;
 public class SongController {
     @Resource
     SongService songService;
-
-    @Resource
-    SongRepository songRepository;
 
     @Resource
     FirebaseStorageService firebaseStorageService;
@@ -130,7 +126,7 @@ public class SongController {
     public String uploadMp3(MultipartFile songData) {
         String fileName = songData.getOriginalFilename();
         try {
-            return firebaseStorageService.uploadMp3(songData, fileName);
+            return firebaseStorageService.uploadMp3(songData, fileName, 10);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -102,32 +102,36 @@ public class FirebaseStorageService {
      * @param fileName: Get the name of file from filePath
      * @return downloadUrl used to add to songData field
      */
-    public String uploadMp3(MultipartFile mp3File, String fileName) throws IOException {
+    public String uploadMp3(MultipartFile mp3File, String fileName, int numberOfParts) throws IOException {
         // Read file MP3 from filePath
         InputStream fileContent2 = mp3File.getInputStream();
 
         // Size of each part
         long fileLength = fileContent2.available(); // Get the total length of the file
-        int chunkSize = (int) Math.ceil(fileLength);
+        int chunkSize = (int) Math.ceil((double) fileLength / numberOfParts);
 
+        int partNumber = 1;
+
+        // Firebase storage config
         try {
             Storage storage = StorageClient.getInstance(firebaseConfig.firebaseApp()).bucket("tunetown-6b63a.appspot.com").getStorage();
-            byte[] chunk = new byte[chunkSize];
 
+            byte[] chunk = new byte[chunkSize];
             // Read and upload each part
-            if (fileContent2.read(chunk) > 0) {
+            while ((fileContent2.read(chunk)) > 0) {
                 int subString = fileName.length() - 4;
                 // Upload each part on firebase
-                BlobInfo partInfo = BlobInfo.newBuilder(BlobId.of("tunetown-6b63a.appspot.com", "audios/" + fileName.substring(0, subString) + "/" + fileName.substring(0, subString) + ".mp3"))
+                BlobInfo partInfo = BlobInfo.newBuilder(BlobId.of("tunetown-6b63a.appspot.com", "audios/" + fileName.substring(0, subString) + "/" + fileName.substring(0, subString) + "_" + partNumber + ".mp3"))
                         .setContentType("audio/mpeg")
                         .build();
 
                 storage.create(partInfo, chunk);
 
                 // Get the URL of each part
-                partDownloadUrl = "https://storage.googleapis.com/tunetown-6b63a.appspot.com/audios/" + fileName.substring(0, subString) + "/" + fileName.substring(0, subString) + ".mp3";
+                partDownloadUrl = "https://storage.googleapis.com/tunetown-6b63a.appspot.com/audios/" + fileName.substring(0, subString) + "/" + fileName.substring(0, subString) + "_" + partNumber + ".mp3";
+                partNumber++;
             }
-            songData = partDownloadUrl;
+            songData = partDownloadUrl.substring(0, partDownloadUrl.length() - 6);
             return songData;
         }
         catch (Exception e) {
