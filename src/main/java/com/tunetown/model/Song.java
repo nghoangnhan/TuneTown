@@ -27,6 +27,6 @@ public class Song {
     private int likes;
     private int listens;
     private int status;
-
+    private String lyric;
 
 }

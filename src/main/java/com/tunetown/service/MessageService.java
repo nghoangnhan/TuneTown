@@ -110,9 +110,31 @@ public class MessageService {
         return false;
     }
 
-    public List<Message> loadMessage(int userId, int sentId){
+    public Map<String, Object> loadMessage(int userId, int sentId){
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (!optionalUser.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
+        }
+
+        // Check receiveUserId exists
+        Optional<User> optionalSentUser = userRepository.findById(sentId);
+        if (!optionalSentUser.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + sentId + " does not exists!");
+        }
+
+        User user = optionalUser.get();
+        User sentUser = optionalSentUser.get();
+        Map<String, Object> messageUserInfo = new HashMap<>();
+
         List<Message> messageList = messageRepository.getMessageByUserId(userId, sentId);
-        return messageList;
+        for(Message message: messageList){
+            Map<String, Object> messageInfo = new HashMap<>();
+            messageInfo.put("user", user);
+            messageInfo.put("sentUser", sentUser);
+            messageInfo.put("message", message);
+            messageUserInfo.put(String.valueOf(message.getId()), messageInfo);
+        }
+        return messageUserInfo;
     }
 
     public Map<String, Object> loadChatList(int userId){

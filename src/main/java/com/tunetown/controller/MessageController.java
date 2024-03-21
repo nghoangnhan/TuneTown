@@ -28,8 +28,8 @@ public class MessageController {
     }
 
     @PostMapping(path = "/loadMessage")
-    public List<Message> loadMessage(@RequestBody Message message){
-        List<Message> messageList = messageService.loadMessage(message.getSendUserId(), message.getReceiveUserId());
+    public Map<String, Object> loadMessage(@RequestBody Message message){
+        Map<String, Object> messageList = messageService.loadMessage(message.getSendUserId(), message.getReceiveUserId());
         return messageList;
     }
 
