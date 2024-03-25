@@ -11,6 +11,7 @@ import com.tunetown.repository.UserRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -141,20 +142,50 @@ public class MessageService {
         ChatList chatList = chatListRepository.getChatListByUserId(userId);
         List<Message> messageList = new ArrayList<>();
         Map<String, Object> chatListInfo = new LinkedHashMap<>(); // LinkedHashMap() to use ordered list as input
-        for(int id: chatList.getSentUser()){
-            User user = userRepository.findById(id).get();
-            if(user != null) {
-                messageList = messageRepository.getMessageByUserId(userId, id);
-                if (!messageList.isEmpty()) {
-                    Message lastMessage = messageList.get(messageList.size() - 1);
-                    Map<String, Object> userChatInfo = new HashMap<>();
-                    userChatInfo.put("user", user);
-                    userChatInfo.put("lastMessage", lastMessage);
-                    chatListInfo.put(String.valueOf(id), userChatInfo);
+
+        // Check chatList null
+        if (chatList == null){
+            chatList = new ChatList();
+        }
+
+        // Check sentUser list null
+        if(chatList.getSentUser() != null){
+            for(int id: chatList.getSentUser()){
+                User user = userRepository.findById(id).get();
+                if(user != null) {
+                    messageList = messageRepository.getMessageByUserId(userId, id);
+                    if (!messageList.isEmpty()) {
+                        Message lastMessage = messageList.get(messageList.size() - 1);
+                        Map<String, Object> userChatInfo = new HashMap<>();
+                        userChatInfo.put("user", user);
+                        userChatInfo.put("lastMessage", lastMessage);
+                        chatListInfo.put(String.valueOf(id), userChatInfo);
+                    }
                 }
             }
         }
-        return chatListInfo;
+        Comparator<Map.Entry<String, Object>> lastMessageDateComparator = (entry1, entry2) -> {
+            Map<String, Object> userChatInfo1 = (Map<String, Object>) entry1.getValue();
+            Map<String, Object> userChatInfo2 = (Map<String, Object>) entry2.getValue();
+
+            Message lastMessage1 = (Message) userChatInfo1.get("lastMessage");
+            Message lastMessage2 = (Message) userChatInfo2.get("lastMessage");
+
+            return lastMessage2.getMessageDate().compareTo(lastMessage1.getMessageDate());
+        };
+
+        // Convert the chatListInfo map to a list for sorting
+        List<Map.Entry<String, Object>> sortedChatList = new ArrayList<>(chatListInfo.entrySet());
+
+        // Sort the list using the comparator
+        Collections.sort(sortedChatList, lastMessageDateComparator);
+
+        // Create a new LinkedHashMap to hold the sorted entries
+        LinkedHashMap<String, Object> sortedChatListInfo = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : sortedChatList) {
+            sortedChatListInfo.put(entry.getKey(), entry.getValue());
+        }
+        return sortedChatListInfo;
     }
 
     public List<Message> findMessageByContent(String content, int userId, int sentUserId){
