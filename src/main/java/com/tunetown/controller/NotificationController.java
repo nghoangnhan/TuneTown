@@ -16,17 +16,17 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping("/message/send")
-    public ResponseEntity<String> sendNotification(@RequestBody Notification notification) {
-        try {
-            String notificationContent = "";
-            if(notification.getType() == 0){
-                notificationContent = "You have a new message!";
-            }
-            notificationService.sendNotification(notification.getReceiveUserId(), notificationContent);
-            return ResponseEntity.ok("Notification sent successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send notification");
-        }
-    }
+//    @PostMapping("/message/send")
+//    public ResponseEntity<String> sendNotification(@RequestBody Notification notification) {
+//        try {
+//            String notificationContent = "";
+//            if(notification.getType() == 0){
+//                notificationContent = "You have a new message!";
+//            }
+//            notificationService.receiveMessage(notification.getReceiveUserId(), notificationContent);
+//            return ResponseEntity.ok("Notification sent successfully");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send notification");
+//        }
+//    }
 }
