@@ -88,4 +88,10 @@ public class PostController {
             return ResponseEntity.ok("Post unliked!");
         }
     }
+
+    @GetMapping("/getById")
+    public Post getPostById(@RequestParam int postId){
+        Post post = postService.getPostById(postId);
+        return post;
+    }
 }

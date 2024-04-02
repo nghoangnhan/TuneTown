@@ -23,4 +23,5 @@ public class Message {
     private int receiveUserId;
     private String content;
     private LocalDateTime messageDate;
+    private int seen; //0: unseen, 1: seen
 }

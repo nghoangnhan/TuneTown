@@ -95,14 +95,15 @@ public class MessageService {
             message.setReceiveUserId(receiveUserId);
             message.setContent(content);
             message.setMessageDate(LocalDateTime.now());
+            message.setSeen(0);
             messageRepository.save(message);
 
             // Send notification
-            Notification messageNotification = new Notification();
-            messageNotification.setReceiveUserId(receiveUserId);
-            messageNotification.setType(0);
-            messageNotification.setStatus(0);
-            notificationRepository.save(messageNotification);
+//            Notification messageNotification = new Notification();
+//            messageNotification.setReceiveUserId(receiveUserId);
+//            messageNotification.setType(0);
+//            messageNotification.setStatus(0);
+//            notificationRepository.save(messageNotification);
 
             return true;
         } catch (Exception e){
@@ -134,6 +135,8 @@ public class MessageService {
             messageInfo.put("sentUser", sentUser);
             messageInfo.put("message", message);
             messageUserInfo.put(String.valueOf(message.getId()), messageInfo);
+            message.setSeen(1);
+            messageRepository.save(message);
         }
         return messageUserInfo;
     }
