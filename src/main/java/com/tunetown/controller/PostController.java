@@ -51,6 +51,14 @@ public class PostController {
         );
     }
 
+    @PutMapping
+    public ResponseEntity<String> updatePost(@RequestBody Post post, @RequestHeader("Authorization") String accessToken){
+        if(postService.updatePost(post, accessToken)){
+            return ResponseEntity.ok("Post updated!");
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not the author!");
+    }
+
     @DeleteMapping
     public ResponseEntity<String> deletePost(@RequestParam int postId, @RequestHeader("Authorization") String accessToken){
         if(postService.deletePost(postId, accessToken)){
@@ -69,5 +77,15 @@ public class PostController {
     public ResponseEntity<String> addReply(@RequestParam int postId, @RequestParam int commentId, @RequestBody Comment reply){
         postService.addReply(postId, commentId, reply);
         return ResponseEntity.ok("Reply added!");
+    }
+
+    @PostMapping("/likePost")
+    public ResponseEntity<String> likePost(@RequestParam int userId, @RequestParam int postId){
+        if(postService.likePost(userId, postId) == 0){
+            return ResponseEntity.ok("Post liked!");
+        }
+        else{
+            return ResponseEntity.ok("Post unliked!");
+        }
     }
 }

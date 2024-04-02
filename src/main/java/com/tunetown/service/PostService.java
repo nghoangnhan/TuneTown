@@ -4,6 +4,7 @@ import com.tunetown.model.*;
 import com.tunetown.repository.*;
 import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,7 +56,13 @@ public class PostService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist with id = " + optionalPlaylist.get().getId() + " does not exists!");
             }
         }
-
+        post.setPostTime(LocalDateTime.now());
+        StringBuilder stringBuilder = new StringBuilder();
+        // Append content to StringBuilder
+        stringBuilder.append("This is a large content");
+        stringBuilder.append(" that may exceed the limits of a normal String");
+        // Convert StringBuilder to String if needed
+        String content = stringBuilder.toString();
         postRepository.save(post);
     }
 
@@ -67,6 +74,39 @@ public class PostService {
     public Page<Post> getPostByAuthorId(int authorId, Pageable pageable){
         Page<Post> listPost =  postRepository.getPostByAuthorId(authorId, pageable);
         return listPost;
+    }
+
+    @Transactional
+    public boolean updatePost(Post post, String accessToken){
+        Optional<Post> optionalPost = postRepository.findById(post.getId());
+        if(!optionalPost.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + post.getId() + " does not exists!");
+        }
+
+        Post postUpdate = optionalPost.get();
+        User user = userRepository.findById(post.getAuthor().getId()).get();
+
+        String token = accessToken.substring(6, accessToken.length());
+        String userEmail = jwtService.extractUserEmail(token.toString());
+        User currentUser = userService.getActiveUserByEmail(userEmail);
+
+        boolean isAuthor = false;
+
+        if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
+            isAuthor = true;
+        }
+
+        if(isAuthor){
+            postUpdate.setContent(post.getContent());
+            postUpdate.setPostTime(LocalDateTime.now());
+            postUpdate.setSong(post.getSong());
+            postUpdate.setPlaylist(post.getPlaylist());
+            postRepository.save(postUpdate);
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     public boolean deletePost(int postId, String accessToken){
@@ -90,8 +130,12 @@ public class PostService {
 
         if(isAuthor){
             postRepository.deleteById(postId);
-            for(Comment reply: post.getComments()){
-                commentRepository.deleteById(reply.getId());
+            for(Comment comment: post.getComments()){
+                commentRepository.deleteById(comment.getId());
+                for(Comment reply: comment.getReply()){
+                    log.info("DELETE REPLY");
+                    commentRepository.delete(reply);
+                }
             }
             return true;
         }
@@ -131,5 +175,31 @@ public class PostService {
 
         comment.getReply().add(reply);
         commentRepository.save(comment);
+    }
+
+    public int likePost(int userId, int postId){
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if(!optionalUser.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
+        }
+
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if(!optionalPost.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + postId + " does not exists!");
+        }
+
+        User user = optionalUser.get();
+        Post post = optionalPost.get();
+
+        if(!post.getLikes().contains(user)){
+            post.getLikes().add(user);
+            postRepository.save(post);
+            return 0;
+        }
+        else{
+            post.getLikes().remove(user);
+            postRepository.save(post);
+            return 1;
+        }
     }
 }

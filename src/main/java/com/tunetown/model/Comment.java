@@ -24,6 +24,6 @@ public class Comment {
     private LocalDateTime commentDate;
     private Integer likes;
     private Integer dislikes;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> reply;
 }

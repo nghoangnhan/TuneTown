@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.List;
 
 @Entity
@@ -27,6 +26,8 @@ public class Song {
     private int likes;
     private int listens;
     private int status;
+    @Lob
+    @Column(length = Integer.MAX_VALUE)
     private String lyric;
 
 }
