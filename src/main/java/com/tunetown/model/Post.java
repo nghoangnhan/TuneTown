@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,13 +20,16 @@ public class Post {
     private int id;
     @ManyToOne(fetch = FetchType.EAGER)
     private User author;
+    @Lob
+    @Column(length = Integer.MAX_VALUE)
     private String content;
     @ManyToOne(fetch = FetchType.EAGER)
     private Song song;
     @ManyToOne(fetch = FetchType.EAGER)
     private Playlist playlist;
-    private Integer likes;
-    private Integer dislikes;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<User> likes;
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Comment> comments;
+    private LocalDateTime postTime;
 }
