@@ -57,12 +57,6 @@ public class PostService {
             }
         }
         post.setPostTime(LocalDateTime.now());
-        StringBuilder stringBuilder = new StringBuilder();
-        // Append content to StringBuilder
-        stringBuilder.append("This is a large content");
-        stringBuilder.append(" that may exceed the limits of a normal String");
-        // Convert StringBuilder to String if needed
-        String content = stringBuilder.toString();
         postRepository.save(post);
     }
 
@@ -201,5 +195,14 @@ public class PostService {
             postRepository.save(post);
             return 1;
         }
+    }
+
+    public Post getPostById(int postId){
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if(!optionalPost.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + postId + " does not exists!");
+        }
+        Post post = optionalPost.get();
+        return post;
     }
 }
