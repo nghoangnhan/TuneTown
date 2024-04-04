@@ -4,7 +4,6 @@ import com.tunetown.model.*;
 import com.tunetown.repository.*;
 import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -31,6 +33,8 @@ public class UserService {
     PlaylistSongsRepository playlistSongsRepository;
     @Resource
     PlaylistRepository playlistRepository;
+    @Resource
+    FollowerService followerService;
 
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -94,72 +98,14 @@ public class UserService {
         dbUser.setRole(user.getRole());
     }
 
-    public boolean followArtist(int artistId, int userId){
-        Optional<User> optionalArtist = userRepository.findById(artistId);
-        if(!optionalArtist.isPresent() || !optionalArtist.get().getRole().equals("ARTIST")){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
-        }
-
-        User artist = optionalArtist.get();
-        Optional<User> optionalUser = userRepository.findById(userId);
-        User user = optionalUser.get();
-
-        try{
-            // Add to list following of user
-            List<Integer> listFollowingArtist = user.getFollowingArtists();
-            listFollowingArtist.add(artistId);
-            user.setFollowingArtists(listFollowingArtist);
-            userRepository.save(user);
-
-            // Add to list followedBy of artist
-            List<Integer> listFollowedBy = artist.getFollowedBy();
-            listFollowedBy.add(userId);
-            artist.setFollowedBy(listFollowedBy);
-            userRepository.save(artist);
-            return true;
-        } catch (Exception e){
-            log.error(e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean unFollowArtist(int artistId, int userId){
-        Optional<User> optionalArtist = userRepository.findById(artistId);
-        if(!optionalArtist.isPresent() || !optionalArtist.get().getRole().equals("ARTIST")){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
-        }
-
-        User artist = optionalArtist.get();
-        Optional<User> optionalUser = userRepository.findById(userId);
-        User user = optionalUser.get();
-
-        try{
-            // Remove from list following of user
-            List<Integer> listFollowingArtist = user.getFollowingArtists();
-            listFollowingArtist.remove(artistId);
-            user.setFollowingArtists(listFollowingArtist);
-            userRepository.save(user);
-
-            // Remove from list followedBy of artist
-            List<Integer> listFollowedBy = artist.getFollowedBy();
-            listFollowedBy.remove(userId);
-            artist.setFollowedBy(listFollowedBy);
-            userRepository.save(artist);
-            return true;
-        } catch (Exception e){
-            log.error(e.getMessage());
-            return false;
-        }
-    }
-
     public boolean addToHistory(int userId, int songId){
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(!optionalUser.isPresent()){
+        if(optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user found with id " + userId);
         }
 
         Optional<Song> optionalSong = songRepository.findById(songId);
-        if(!optionalSong.isPresent()){
+        if(optionalSong.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No song found with id " + songId);
         }
 
@@ -184,22 +130,20 @@ public class UserService {
 
     public List<UserHistory> getHistoryByUserId(int userId){
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(!optionalUser.isPresent()){
+        if(optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user found with id " + userId);
         }
 
-        List<UserHistory> userHistoryList = userHistoryRepository.getHistoryByUserId(userId);
-        return userHistoryList;
+        return userHistoryRepository.getHistoryByUserId(userId);
     }
 
     /**
      * Get artist id, name, avatar and add the songId list of that artist to Object
-     * @param artistId
      * @return Object with information
      */
     public Map<String, Object> getArtistDetail(int artistId){
         Optional<User> optionalArtist = userRepository.findById(artistId);
-        if(!optionalArtist.isPresent() || !optionalArtist.get().getRole().equals("ARTIST")){
+        if(optionalArtist.isEmpty() || !optionalArtist.get().getRole().equals("ARTIST")){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
         }
 
@@ -207,24 +151,29 @@ public class UserService {
         List<Song> songList = songRepository.songListByArtist(artistId);
         Object[] artistDetails = artistDetailList.get(0);
 
+        int numberOfFollowers = followerService.getNumberOfFollowers(artistId);
+        int numberOfFollowing = followerService.getNumberOfFollowing(artistId);
+
         Map<String, Object> artistInfo = new HashMap<>();
         artistInfo.put("id", artistDetails[0]);
         artistInfo.put("name", artistDetails[1]);
         artistInfo.put("avatar", artistDetails[2]);
         artistInfo.put("songs", songList);
+        artistInfo.put("followers", numberOfFollowers);
+        artistInfo.put("following", numberOfFollowing);
 
         return artistInfo;
     }
 
     public boolean deleteUser(int userId, String accessToken){
         Optional<User> optionalUser = userRepository.findById(userId);
-        if (!optionalUser.isPresent()){
+        if (optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
         }
 
         try{
-            String token = accessToken.substring(6, accessToken.length());
-            String userEmail = jwtService.extractUserEmail(token.toString());
+            String token = accessToken.substring(6);
+            String userEmail = jwtService.extractUserEmail(token);
             User currentUser = getActiveUserByEmail(userEmail);
 
             if(!currentUser.getRole().equals("ADMIN")){
@@ -248,10 +197,7 @@ public class UserService {
                      ) {
                     List<PlaylistSongs> playlistSongsList = playlistSongsRepository.getPlaylistSongsById(playlist.getId());
                     if(!playlistSongsList.isEmpty()){
-                        for (PlaylistSongs playlistSong : playlistSongsList
-                             ) {
-                            playlistSongsRepository.delete(playlistSong);
-                        }
+                        playlistSongsRepository.deleteAll(playlistSongsList);
                     }
                     playlistRepository.delete(playlist);
                 }
@@ -260,21 +206,7 @@ public class UserService {
             // Delete all user listen history
             List<UserHistory> userHistoryList = userHistoryRepository.getHistoryByUserId(userId);
             if(!userHistoryList.isEmpty()){
-                for (UserHistory userHistory : userHistoryList
-                     ) {
-                    userHistoryRepository.delete(userHistory);
-                }
-            }
-
-            // Remove from list followedBy of artist
-            List<User> userList = userRepository.findAll();
-            for (User user : userList
-                 ) {
-                if(!user.getFollowedBy().isEmpty()){
-                    user.getFollowedBy().removeIf(artistId -> artistId.equals(userId));
-                    user.setFollowedBy(user.getFollowedBy());
-                    userRepository.save(user);
-                }
+                userHistoryRepository.deleteAll(userHistoryList);
             }
 
             userRepository.delete(optionalUser.get());
