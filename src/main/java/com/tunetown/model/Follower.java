@@ -6,24 +6,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-@Entity
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@Setter
+@Getter
+@Entity
+public class Follower {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private String userName;
-    private String email;
-    private String password;
-    private String role;
+
+    @OneToOne
+    private User follower;
+    @OneToOne
+    private User subject;
+
     @Temporal(TemporalType.DATE)
-    private Date birthDate;
-    private String userBio;
-    private String avatar;
-    private String method;
+    private LocalDate followedDate;
 }
