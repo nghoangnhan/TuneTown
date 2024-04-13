@@ -216,4 +216,9 @@ public class UserService {
         }
         return false;
     }
+
+    public List<User> getListUserByName(String userName){
+        List<User> listUser = userRepository.getListUserByName(userName);
+        return listUser;
+    }
 }
