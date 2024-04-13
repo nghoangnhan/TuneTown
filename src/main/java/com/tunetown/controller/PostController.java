@@ -94,4 +94,10 @@ public class PostController {
         Post post = postService.getPostById(postId);
         return post;
     }
+
+    @GetMapping("/comment/getById")
+    public Comment getCommentById(@RequestParam int commentId){
+        Comment comment = postService.getCommentById(commentId);
+        return comment;
+    }
 }

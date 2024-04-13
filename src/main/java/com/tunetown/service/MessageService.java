@@ -25,8 +25,8 @@ public class MessageService {
     MessageRepository messageRepository;
     @Resource
     ChatListRepository chatListRepository;
-    @Resource
-    NotificationRepository notificationRepository;
+//    @Resource
+//    NotificationRepository notificationRepository;
     @Resource
     UserRepository userRepository;
 
@@ -104,7 +104,6 @@ public class MessageService {
 //            messageNotification.setType(0);
 //            messageNotification.setStatus(0);
 //            notificationRepository.save(messageNotification);
-
             return true;
         } catch (Exception e){
             log.error(e.getMessage());
@@ -135,6 +134,10 @@ public class MessageService {
             messageInfo.put("sentUser", sentUser);
             messageInfo.put("message", message);
             messageUserInfo.put(String.valueOf(message.getId()), messageInfo);
+            messageRepository.save(message);
+        }
+        List<Message> messageListBySentUser = messageRepository.messageListByAuthor(sentId);
+        for(Message message: messageListBySentUser){
             message.setSeen(1);
             messageRepository.save(message);
         }

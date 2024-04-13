@@ -112,4 +112,10 @@ public class UserController {
         followerService.unfollow(follower);
         return ResponseEntity.ok("Unfollowed");
     }
+
+    @GetMapping(path = "/getListByName")
+    public List<User> getListUserByName(@RequestParam String userName){
+        List<User> listUser = userService.getListUserByName(userName);
+        return listUser;
+    }
 }
