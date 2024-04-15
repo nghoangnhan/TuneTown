@@ -151,4 +151,10 @@ public class SongController {
     public List<Genre> getALlGenres(){
         return songService.getAllGenres();
     }
+
+    @PostMapping("/combineData")
+    public byte[] combineData(@RequestParam("fileName") String fileName){
+        byte[] combineFile = firebaseStorageService.combineMP3(fileName);
+        return combineFile;
+    }
 }
