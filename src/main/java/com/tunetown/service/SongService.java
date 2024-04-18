@@ -1,6 +1,5 @@
 package com.tunetown.service;
 
-import com.tunetown.config.FirebaseConfig;
 import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
 import com.tunetown.model.User;
@@ -20,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +38,6 @@ public class SongService {
 
     /**
      * Get all songs that status = 1 (Enabled) by Paging Technique
-     * @return
      */
     public Page<Song> getAllSongs(Pageable pageable){
         return songRepository.getByStatus(1, pageable);
@@ -58,30 +55,29 @@ public class SongService {
 
     /**
      * Use Soft Delete to set deletedSong status to 0 (Disabled) instead of delete song
-     * @param id
      */
     public boolean deleteSong(int id, String accessToken){
         Optional<Song> optionalSong = songRepository.findById(id);
         if (optionalSong.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + optionalSong.get().getId() + " does not exists!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + id + " does not exists!");
         }
 
         Song deletedSong = getActiveSongById(id);
-        String token = accessToken.substring(6, accessToken.length());
-        String userEmail = jwtService.extractUserEmail(token.toString());
+        String token = accessToken.substring(6);
+        String userEmail = jwtService.extractUserEmail(token);
         User currentUser = userService.getActiveUserByEmail(userEmail);
 
         boolean isArtist = false;
 
         if(deletedSong.getArtists().isEmpty()){
-            if(currentUser.getRole().toUpperCase().equals("ADMIN")){
+            if(currentUser.getRole().equalsIgnoreCase("ADMIN")){
                 isArtist = true;
             }
         }
         else{
             for (User user: deletedSong.getArtists()
             ) {
-                if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
+                if(userEmail.equals(user.getEmail()) || currentUser.getRole().equalsIgnoreCase("ADMIN")){
                     isArtist = true;
                     break;
                 }
@@ -109,20 +105,20 @@ public class SongService {
         }
 
         Song songUpdate = optionalSong.get();
-        String token = accessToken.substring(6, accessToken.length());
-        String userEmail = jwtService.extractUserEmail(token.toString());
+        String token = accessToken.substring(6);
+        String userEmail = jwtService.extractUserEmail(token);
         User currentUser = userService.getActiveUserByEmail(userEmail);
 
         boolean isArtist = false;
 
         if(songUpdate.getArtists().isEmpty()){
-            if(currentUser.getRole().toUpperCase().equals("ADMIN")){
+            if(currentUser.getRole().equalsIgnoreCase("ADMIN")){
                 isArtist = true;
             }
         }
         else{
             for (User user : songUpdate.getArtists()) {
-                if (userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")) {
+                if (userEmail.equals(user.getEmail()) || currentUser.getRole().equalsIgnoreCase("ADMIN")) {
                     isArtist = true;
                     break;
                 }
@@ -182,8 +178,6 @@ public class SongService {
 
     /**
      * Get song that active (status = 1)
-     * @param id
-     * @return
      */
     public Song getActiveSongById(int id){
         Optional<Song> optionalSong = songRepository.getSongById(id);
@@ -199,7 +193,7 @@ public class SongService {
     /**
      * Find by songName or artistName, just find active songs
      * @param name Use songName or artistName. It can be split into two parts if user input both songName and artistName
-     * @return: list of songs found
+     * @return list of songs found
      */
     public List<Song> findSongByNameOrArtist(String name){
         String[] parts = name.split(" "); // Split the name parameter into parts by space
@@ -216,9 +210,6 @@ public class SongService {
 
     /**
      * Get the list of songs between a time period listened
-     * @param startTime
-     * @param endTime
-     * @return
      */
     public List<Map<String, Object>> getTopSongByPeriod(LocalDateTime startTime, LocalDateTime endTime){
         List<UserHistory> userHistoryList = userHistoryRepository.getTopSongByPeriod(startTime, endTime);
@@ -247,7 +238,13 @@ public class SongService {
     }
 
     public List<Genre> getAllGenres(){
-        List<Genre> genreList = genreRepository.getAllGenres();
-        return genreList;
+        return genreRepository.getAllGenres();
+    }
+
+    /**
+     * Get List of recommended Songs.
+     */
+    public List<Song> getRecommendedSongs(User user) {
+        return songRepository.getListRecommendedSong(user.getId());
     }
 }

@@ -1,6 +1,7 @@
 package com.tunetown.controller;
 
 import com.tunetown.model.Follower;
+import com.tunetown.model.Genre;
 import com.tunetown.model.User;
 import com.tunetown.model.UserHistory;
 import com.tunetown.service.FollowerService;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -117,5 +119,12 @@ public class UserController {
     public List<User> getListUserByName(@RequestParam String userName){
         List<User> listUser = userService.getListUserByName(userName);
         return listUser;
+    }
+
+    @PutMapping(path = "/modify-favorite-genres")
+    public ResponseEntity<String> modifyFavoriteGenres(@RequestBody List<Genre> genres, Authentication authentication) {
+        User user = userService.getActiveUserByEmail(authentication.getName());
+        userService.modifyUserFavouriteGenres(user, genres);
+        return ResponseEntity.ok("Modified");
     }
 }

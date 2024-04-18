@@ -30,4 +30,8 @@ public class Song {
     @Column(length = Integer.MAX_VALUE)
     private String lyric;
 
+    public Song(int id) {
+        this.id = id;
+    }
+
 }
