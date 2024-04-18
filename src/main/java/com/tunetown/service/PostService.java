@@ -205,4 +205,13 @@ public class PostService {
         Post post = optionalPost.get();
         return post;
     }
+
+    public Comment getCommentById(int commentId){
+        Optional<Comment> optionalComment = commentRepository.findById(commentId);
+        if(!optionalComment.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment with id = " + commentId + " does not exists!");
+        }
+        Comment comment = optionalComment.get();
+        return comment;
+    }
 }

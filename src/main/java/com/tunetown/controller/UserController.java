@@ -115,6 +115,12 @@ public class UserController {
         return ResponseEntity.ok("Unfollowed");
     }
 
+    @GetMapping(path = "/getListByName")
+    public List<User> getListUserByName(@RequestParam String userName){
+        List<User> listUser = userService.getListUserByName(userName);
+        return listUser;
+    }
+
     @PutMapping(path = "/modify-favorite-genres")
     public ResponseEntity<String> modifyFavoriteGenres(@RequestBody List<Genre> genres, Authentication authentication) {
         User user = userService.getActiveUserByEmail(authentication.getName());

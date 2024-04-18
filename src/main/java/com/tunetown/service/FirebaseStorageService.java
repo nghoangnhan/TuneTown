@@ -1,8 +1,7 @@
 package com.tunetown.service;
 
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
+import com.google.api.client.util.IOUtils;
+import com.google.cloud.storage.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -14,23 +13,28 @@ import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.UUID;
-
 @Service
 @Slf4j
 public class FirebaseStorageService {
     @Resource
     FirebaseConfig firebaseConfig;
-
+    private final Storage storage;
     String downloadUrlImage = "";
     String appCheckToken = "";
     String songData = "";
     String partDownloadUrl = "";
+
+    public FirebaseStorageService() {
+        this.storage = StorageOptions.getDefaultInstance().getService();
+    }
 
     /**
      * Generate App Token for handle with FirebaseStorage
@@ -180,5 +184,28 @@ public class FirebaseStorageService {
             e.printStackTrace();
         }
         return false;
+    }
+    public byte[] combineMP3(String fileName) {
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+            // Download each part and write it to the output stream
+            for (int partNumber = 1; partNumber <= 10; partNumber++) {
+                String partObjectName = "audios/" + fileName + "/" + fileName + "_" + partNumber + ".mp3";
+                Blob blob = storage.get("tunetown-6b63a.appspot.com", partObjectName);
+                if (blob != null) {
+                    byte[] blobBytes = blob.getContent();
+                    outputStream.write(blobBytes);
+                }
+            }
+            // Convert the ByteArrayOutputStream to a byte array
+            byte[] combinedMP3Data = outputStream.toByteArray();
+            // Close the output stream
+            outputStream.close();
+            return combinedMP3Data;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
