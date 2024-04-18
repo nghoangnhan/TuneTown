@@ -216,4 +216,12 @@ public class UserService {
         }
         return false;
     }
+
+    /**
+     * Modify List of favorite Genres of User
+     */
+    public void modifyUserFavouriteGenres(User user, List<Genre> genres) {
+        user.setGenres(genres);
+        userRepository.save(user);
+    }
 }

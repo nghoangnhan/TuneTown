@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -26,4 +27,7 @@ public class User {
     private String userBio;
     private String avatar;
     private String method;
+
+    @ManyToMany
+    private List<Genre> genres;
 }
