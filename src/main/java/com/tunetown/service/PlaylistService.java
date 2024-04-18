@@ -128,4 +128,31 @@ public class PlaylistService {
             return false;
         }
     }
+
+    /**
+     * Create a playlist based on recommended songs.
+     */
+    public Playlist createRecommendedPlaylist(User user) {
+        Optional<Playlist> optionalPlaylist = playlistRepository.getUserRecommendedPlaylist(user.getId());
+        Playlist savedPlaylist;
+        if(optionalPlaylist.isEmpty()) {
+            Playlist playlist = new Playlist();
+            playlist.setUser(user);
+            playlist.setPlaylistName("Songs from what you like");
+            playlist.setPlaylistType("Recommended");
+
+            savedPlaylist = playlistRepository.save(playlist);
+        }
+        else {
+            savedPlaylist = optionalPlaylist.get();
+            List<PlaylistSongs> playlistSongs = playlistSongsRepository.getPlaylistSongsById(savedPlaylist.getId());
+            playlistSongsRepository.deleteAll(playlistSongs);
+        }
+
+        List<Song> recommendedSongs = songService.getRecommendedSongs(user);
+        for(Song song : recommendedSongs)
+            addSongToPlaylist(song.getId(), savedPlaylist.getId());
+
+        return savedPlaylist;
+    }
 }
