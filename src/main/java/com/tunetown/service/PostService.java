@@ -95,6 +95,7 @@ public class PostService {
             postUpdate.setPostTime(LocalDateTime.now());
             postUpdate.setSong(post.getSong());
             postUpdate.setPlaylist(post.getPlaylist());
+            postUpdate.setMp3Link((postUpdate.getMp3Link()));
             postRepository.save(postUpdate);
             return true;
         }
