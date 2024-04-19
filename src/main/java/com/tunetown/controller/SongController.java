@@ -153,8 +153,8 @@ public class SongController {
     }
 
     @PostMapping("/combineData")
-    public byte[] combineData(@RequestParam("fileName") String fileName){
-        byte[] combineFile = firebaseStorageService.combineMP3(fileName);
+    public byte[] combineData(@RequestParam("songId") int songId){
+        byte[] combineFile = firebaseStorageService.combineMP3(songId);
         return combineFile;
     }
 }

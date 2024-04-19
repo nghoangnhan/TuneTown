@@ -7,11 +7,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.cloud.StorageClient;
 import com.tunetown.config.FirebaseConfig;
+import com.tunetown.model.Song;
+import com.tunetown.repository.SongRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -20,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 @Service
 @Slf4j
@@ -31,6 +36,9 @@ public class FirebaseStorageService {
     String appCheckToken = "";
     String songData = "";
     String partDownloadUrl = "";
+    @Resource
+    SongRepository songRepository;
+
 
     public FirebaseStorageService() {
         this.storage = StorageOptions.getDefaultInstance().getService();
@@ -185,8 +193,15 @@ public class FirebaseStorageService {
         }
         return false;
     }
-    public byte[] combineMP3(String fileName) {
+    public byte[] combineMP3(Integer songId) {
         try {
+            Optional<Song> optionalSong = songRepository.findById(songId);
+            if (optionalSong.isEmpty()){
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + songId + " does not exists!");
+            }
+            Song song = optionalSong.get();
+            String[] parts = song.getSongData().split("audios/");
+            String fileName = parts[1].split("/")[0];
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
             // Download each part and write it to the output stream
