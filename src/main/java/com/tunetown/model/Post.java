@@ -25,6 +25,7 @@ public class Post {
     private String content;
     @ManyToOne(fetch = FetchType.EAGER)
     private Song song;
+    private String mp3Link;
     @ManyToOne(fetch = FetchType.EAGER)
     private Playlist playlist;
     @ManyToMany(fetch = FetchType.EAGER)
