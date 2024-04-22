@@ -227,11 +227,14 @@ public class SongService {
             if (count >= 10) {
                 break;
             }
-            Map<String, Object> songInfo = new HashMap<>();
-            songInfo.put("song", entry.getKey());  // Key: The object song
-            songInfo.put("count", entry.getValue()); // Value: Listen count
-            top10SongList.add(songInfo);
-            count++;
+            Song song = entry.getKey();
+            if(song.getStatus() != 0){
+                Map<String, Object> songInfo = new HashMap<>();
+                songInfo.put("song", entry.getKey());  // Key: The object song
+                songInfo.put("count", entry.getValue()); // Value: Listen count
+                top10SongList.add(songInfo);
+                count++;
+            }
         }
 
         return top10SongList;
