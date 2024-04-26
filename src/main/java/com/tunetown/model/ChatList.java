@@ -20,4 +20,6 @@ public class ChatList {
     private int userId;
     @ElementCollection
     private List<Integer> sentUser;
+    @ElementCollection
+    private List<Integer> sentCommunity;
 }

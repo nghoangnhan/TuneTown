@@ -1,13 +1,7 @@
 package com.tunetown.service;
 
-import com.tunetown.model.ChatList;
-import com.tunetown.model.Message;
-import com.tunetown.model.Notification;
-import com.tunetown.model.User;
-import com.tunetown.repository.ChatListRepository;
-import com.tunetown.repository.MessageRepository;
-import com.tunetown.repository.NotificationRepository;
-import com.tunetown.repository.UserRepository;
+import com.tunetown.model.*;
+import com.tunetown.repository.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,81 +23,93 @@ public class MessageService {
 //    NotificationRepository notificationRepository;
     @Resource
     UserRepository userRepository;
+    @Resource
+    CommunityService communityService;
+    @Resource
+    CommunityRepository communityRepository;
 
     public boolean sendMessage(int sendUserId, int receiveUserId, String content){
+        Optional<Community> optionalCommunity = Optional.ofNullable(new Community());
         Optional<User> optionalUser = userRepository.findById(sendUserId);
         if (!optionalUser.isPresent()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + sendUserId + " does not exists!");
+            optionalCommunity = communityRepository.findById(sendUserId);
+            if(!optionalCommunity.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + sendUserId + " does not exists!");
+            }
         }
 
         // Check receiveUserId exists
         Optional<User> receiveUserIdCheck = userRepository.findById(receiveUserId);
         if (!receiveUserIdCheck.isPresent()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + receiveUserId + " does not exists!");
+            optionalCommunity = communityRepository.findById(receiveUserId);
+            if(!optionalCommunity.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + receiveUserId + " does not exists!");
+            }
         }
 
         try{
-            // Update chat list user
-            ChatList chatListSent = chatListRepository.getChatListByUserId(sendUserId);
-            ChatList chatListReceived = chatListRepository.getChatListByUserId(receiveUserId);
+            if(optionalUser.isPresent() && receiveUserIdCheck.isPresent()){
+                // Update chat list user
+                ChatList chatListSent = chatListRepository.getChatListByUserId(sendUserId);
+                ChatList chatListReceived = chatListRepository.getChatListByUserId(receiveUserId);
 
-            // Initialize if the chatlist is null
-            if(chatListSent == null){
-                log.info("Chat list sent null");
-                chatListSent = new ChatList();
-                chatListSent.setUserId(sendUserId);
+                // Initialize if the chatlist is null
+                if(chatListSent == null){
+                    chatListSent = new ChatList();
+                    chatListSent.setUserId(sendUserId);
+                }
+
+                List<Integer> sentUserList = chatListSent.getSentUser();
+                if (sentUserList == null) {
+                    sentUserList = new ArrayList<>(); // Initialize the list if it's null
+                }
+                if (!sentUserList.contains(receiveUserId)) {
+                    sentUserList.add(0, receiveUserId);
+                }
+                chatListSent.setSentUser(sentUserList);
+
+
+                if(chatListReceived == null){
+                    chatListReceived = new ChatList();
+                    chatListReceived.setUserId(receiveUserId);
+                }
+                List<Integer> receiveUserList = chatListReceived.getSentUser();
+
+
+                // Re-order chat list of received user
+                if (receiveUserList == null) {
+                    receiveUserList = new ArrayList<>(); // Initialize the list if it's null
+                }
+
+                if (!receiveUserList.contains(sendUserId)){
+                    receiveUserList.add(0, sendUserId);
+                }
+                chatListReceived.setSentUser(receiveUserList);
+
+                chatListRepository.saveAll(Arrays.asList(chatListSent, chatListReceived));
+
+                Message message = new Message();
+                message.setSendUser(optionalUser.get());
+                message.setReceiveUserId(receiveUserId);
+                message.setContent(content);
+                message.setMessageDate(LocalDateTime.now());
+                message.setSeen(0);
+                message.setType(0);
+                messageRepository.save(message);
+            }
+            else{
+                Message message = new Message();
+                message.setSendUser(optionalUser.get());
+                message.setReceiveUserId(optionalCommunity.get().getId());
+                message.setContent(content);
+                message.setMessageDate(LocalDateTime.now());
+                message.setSeen(1);
+                message.setType(1);
+                messageRepository.save(message);
+                optionalCommunity.get().getCommunityMessages().add(message);
+                communityRepository.save(optionalCommunity.get());
             }
 
-            List<Integer> sentUserList = chatListSent.getSentUser();
-            if (sentUserList == null) {
-                log.info("Sent User List null");
-                sentUserList = new ArrayList<>(); // Initialize the list if it's null
-            }
-            log.info("Receive User: " + receiveUserId);
-            if (!sentUserList.contains(receiveUserId)) {
-                log.info("Not contain 1");
-                sentUserList.add(0, receiveUserId);
-            }
-            chatListSent.setSentUser(sentUserList);
-
-
-            if(chatListReceived == null){
-                log.info("Chat list receive null");
-                chatListReceived = new ChatList();
-                chatListReceived.setUserId(receiveUserId);
-            }
-            List<Integer> receiveUserList = chatListReceived.getSentUser();
-
-
-            // Re-order chat list of received user
-            if (receiveUserList == null) {
-                log.info("Receive null");
-                receiveUserList = new ArrayList<>(); // Initialize the list if it's null
-            }
-            log.info("Sent User: " + sendUserId);
-
-            if (!receiveUserList.contains(sendUserId)){
-                log.info("Not contain 2");
-                receiveUserList.add(0, sendUserId);
-            }
-            chatListReceived.setSentUser(receiveUserList);
-
-            chatListRepository.saveAll(Arrays.asList(chatListSent, chatListReceived));
-
-            Message message = new Message();
-            message.setSendUserId(sendUserId);
-            message.setReceiveUserId(receiveUserId);
-            message.setContent(content);
-            message.setMessageDate(LocalDateTime.now());
-            message.setSeen(0);
-            messageRepository.save(message);
-
-            // Send notification
-//            Notification messageNotification = new Notification();
-//            messageNotification.setReceiveUserId(receiveUserId);
-//            messageNotification.setType(0);
-//            messageNotification.setStatus(0);
-//            notificationRepository.save(messageNotification);
             return true;
         } catch (Exception e){
             log.error(e.getMessage());
@@ -112,34 +118,57 @@ public class MessageService {
     }
 
     public Map<String, Object> loadMessage(int userId, int sentId){
+        Optional<Community> optionalCommunity = Optional.ofNullable(new Community());
         Optional<User> optionalUser = userRepository.findById(userId);
         if (!optionalUser.isPresent()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
+            optionalCommunity = communityRepository.findById(userId);
+            if(!optionalCommunity.isPresent())
+            {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
+            }
         }
 
         // Check receiveUserId exists
         Optional<User> optionalSentUser = userRepository.findById(sentId);
         if (!optionalSentUser.isPresent()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + sentId + " does not exists!");
+            optionalCommunity = communityRepository.findById(sentId);
+            if(!optionalCommunity.isPresent())
+            {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + sentId + " does not exists!");
+            }
         }
-
-        User user = optionalUser.get();
-        User sentUser = optionalSentUser.get();
         Map<String, Object> messageUserInfo = new HashMap<>();
 
-        List<Message> messageList = messageRepository.getMessageByUserId(userId, sentId);
-        for(Message message: messageList){
-            Map<String, Object> messageInfo = new HashMap<>();
-            messageInfo.put("user", user);
-            messageInfo.put("sentUser", sentUser);
-            messageInfo.put("message", message);
-            messageUserInfo.put(String.valueOf(message.getId()), messageInfo);
-            messageRepository.save(message);
+        if(optionalUser.isPresent() && optionalSentUser.isPresent()){
+            User sentUser = optionalSentUser.get();
+
+            List<Message> messageList = messageRepository.getMessageByUserId(userId, sentId);
+            for(Message message: messageList){
+                Map<String, Object> messageInfo = new HashMap<>();
+                messageInfo.put("sentUser", sentUser);
+                messageInfo.put("message", message);
+                messageUserInfo.put(String.valueOf(message.getId()), messageInfo);
+                messageRepository.save(message);
+            }
+            List<Message> messageListBySentUser = messageRepository.messageListByAuthor(sentId);
+            for(Message message: messageListBySentUser){
+                message.setSeen(1);
+                messageRepository.save(message);
+            }
         }
-        List<Message> messageListBySentUser = messageRepository.messageListByAuthor(sentId);
-        for(Message message: messageListBySentUser){
-            message.setSeen(1);
-            messageRepository.save(message);
+        else{
+            Community community = optionalCommunity.get();
+            User user = optionalUser.get();
+
+            List<Message> messageList = messageRepository.getMessageByUserId(userId, community.getId());
+            for(Message message: messageList){
+                Map<String, Object> messageInfo = new HashMap<>();
+                messageInfo.put("user", user);
+                messageInfo.put("community", community);
+                messageInfo.put("message", message);
+                messageUserInfo.put(String.valueOf(community.getId()), messageInfo);
+                messageRepository.save(message);
+            }
         }
         return messageUserInfo;
     }
@@ -166,6 +195,21 @@ public class MessageService {
                         userChatInfo.put("user", user);
                         userChatInfo.put("lastMessage", lastMessage);
                         chatListInfo.put(String.valueOf(id), userChatInfo);
+                    }
+                }
+            }
+        }
+        if(chatList.getSentCommunity() != null){
+            for(int hostId: chatList.getSentCommunity()){
+                Community community = communityService.getCommunityById(hostId);
+                if(community != null) {
+                    messageList = messageRepository.getMessageByUserId(community.getId(), userId);
+                    if (!messageList.isEmpty()) {
+                        Message lastMessage = community.getCommunityMessages().get(community.getCommunityMessages().size() - 1);
+                        Map<String, Object> communityChatInfo = new HashMap<>();
+                        communityChatInfo.put("community", community);
+                        communityChatInfo.put("lastMessage", lastMessage);
+                        chatListInfo.put("Community " + community.getId(), communityChatInfo);
                     }
                 }
             }

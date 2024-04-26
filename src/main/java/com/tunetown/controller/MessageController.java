@@ -20,7 +20,7 @@ public class MessageController {
     MessageService messageService;
     @PostMapping(path = "/sendMessage")
     public ResponseEntity<String> sendMessage(@RequestBody Message message){
-        if(messageService.sendMessage(message.getSendUserId(), message.getReceiveUserId(), message.getContent())){
+        if(messageService.sendMessage(message.getSendUser().getId(), message.getReceiveUserId(), message.getContent())){
             return ResponseEntity.ok("Message sent! Content: " + message.getContent());
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to send message!");
@@ -29,7 +29,7 @@ public class MessageController {
 
     @PostMapping(path = "/loadMessage")
     public Map<String, Object> loadMessage(@RequestBody Message message){
-        Map<String, Object> messageList = messageService.loadMessage(message.getSendUserId(), message.getReceiveUserId());
+        Map<String, Object> messageList = messageService.loadMessage(message.getSendUser().getId(), message.getReceiveUserId());
         return messageList;
     }
 
@@ -41,7 +41,7 @@ public class MessageController {
 
     @PostMapping(path = "/findMessage")
     public List<Message> findMessageByContent(@RequestBody Message message){
-        List<Message> messageFound = messageService.findMessageByContent(message.getContent(), message.getSendUserId(), message.getReceiveUserId());
+        List<Message> messageFound = messageService.findMessageByContent(message.getContent(), message.getSendUser().getId(), message.getReceiveUserId());
         return messageFound;
     }
 }
