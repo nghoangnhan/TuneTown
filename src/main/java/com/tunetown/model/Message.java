@@ -19,9 +19,11 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private int sendUserId;
+    @OneToOne(fetch = FetchType.EAGER)
+    private User sendUser;
     private int receiveUserId;
     private String content;
     private LocalDateTime messageDate;
-    private int seen; //0: unseen, 1: seen
+    private int seen; // 0: unseen, 1: seen
+    private int type; // 0: private: 1: community, 2: system
 }
