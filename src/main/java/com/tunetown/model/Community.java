@@ -27,4 +27,5 @@ public class Community {
     private List<User> approveRequests;
     @OneToMany(fetch = FetchType.LAZY)
     private List<Message> communityMessages;
+    private String communityAvatar;
 }

@@ -91,7 +91,7 @@ public class CommunityService {
         if(approveRequest.getIsApprove() == 1){
             community.getJoinUsers().add(approveUser);
             Message message = new Message();
-            message.setContent("Welcome " + approveRequest.getApproveUserId() + " to community!");
+            message.setContent("Welcome " + approveUser.getUserName() + " to community!");
             message.setSendUser(approveUser);
             message.setReceiveUserId(community.getId());
             message.setMessageDate(LocalDateTime.now());
