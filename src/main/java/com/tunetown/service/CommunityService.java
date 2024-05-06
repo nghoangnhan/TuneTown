@@ -165,4 +165,9 @@ public class CommunityService {
         chatListRepository.save(chatList);
         communityRepository.save(community);
     }
+
+    public List<Community> searchCommunityByName(String communityName){
+        List<Community> listCommunity = communityRepository.searchCommunityByName(communityName);
+        return listCommunity;
+    }
 }

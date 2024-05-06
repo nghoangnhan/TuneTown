@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Slf4j
 @RequestMapping("/community")
@@ -59,4 +61,8 @@ public class CommunityController {
         return ResponseEntity.ok("Community left");
     }
 
+    @GetMapping("/searchByName")
+    public List<Community> searchCommunityByName(@RequestParam("communityName") String communityName){
+        return communityService.searchCommunityByName(communityName);
+    }
 }
