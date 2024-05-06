@@ -39,7 +39,6 @@ public class SecurityConfiguration {
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable);
-
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)
@@ -51,7 +50,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        List<String> allowedOrigins = Arrays.asList("http://localhost:5173", "https://tunetown-ute.vercel.app/", "https://tunetown.netlify.app/");
+        List<String> allowedOrigins = Arrays.asList("http://localhost:5173", "https://tunetown-ute.vercel.app/", "https://tunetown.netlify.app/", "http://localhost:4173");
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
