@@ -1,5 +1,6 @@
 package com.tunetown.controller;
 
+import com.tunetown.model.ChatList;
 import com.tunetown.model.Message;
 import com.tunetown.service.MessageService;
 import jakarta.annotation.Resource;
@@ -43,5 +44,11 @@ public class MessageController {
     public List<Message> findMessageByContent(@RequestBody Message message){
         List<Message> messageFound = messageService.findMessageByContent(message.getContent(), message.getSendUser().getId(), message.getReceiveUserId());
         return messageFound;
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteChat(@RequestBody ChatList chatList){
+        messageService.deleteChat(chatList);
+        return ResponseEntity.ok("Chat deleted!");
     }
 }

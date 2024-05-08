@@ -19,6 +19,8 @@ public class MessageService {
     MessageRepository messageRepository;
     @Resource
     ChatListRepository chatListRepository;
+    @Resource
+    ChatDeletedRepository chatDeletedRepository;
 //    @Resource
 //    NotificationRepository notificationRepository;
     @Resource
@@ -140,15 +142,18 @@ public class MessageService {
         Map<String, Object> messageUserInfo = new HashMap<>();
 
         if(optionalUser.isPresent() && optionalSentUser.isPresent()){
+            ChatDeleted chatDeleted = chatDeletedRepository.getChatDeleted(userId, sentId);
             User sentUser = optionalSentUser.get();
 
             List<Message> messageList = messageRepository.getMessageByUserId(userId, sentId);
             for(Message message: messageList){
-                Map<String, Object> messageInfo = new HashMap<>();
-                messageInfo.put("sentUser", sentUser);
-                messageInfo.put("message", message);
-                messageUserInfo.put(String.valueOf(message.getId()), messageInfo);
-                messageRepository.save(message);
+                if(chatDeleted == null || chatDeleted.getTimeDeleted().isBefore(message.getMessageDate())){
+                    Map<String, Object> messageInfo = new HashMap<>();
+                    messageInfo.put("sentUser", sentUser);
+                    messageInfo.put("message", message);
+                    messageUserInfo.put(String.valueOf(message.getId()), messageInfo);
+                    messageRepository.save(message);
+                }
             }
             List<Message> messageListBySentUser = messageRepository.messageListByAuthor(sentId);
             for(Message message: messageListBySentUser){
@@ -242,5 +247,26 @@ public class MessageService {
         List<Message> messageFound = messageRepository.findMessageByContent(content,userId,sentUserId);
         Collections.reverse(messageFound); // Reverse the order of the list
         return messageFound;
+    }
+
+    public void deleteChat(ChatList chatList){
+        Optional<User> optionalUser = userRepository.findById(chatList.getUserId());
+        if (!optionalUser.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat with id = " + chatList.getUserId() + " does not exists!");
+        }
+
+        ChatList chatList1 = chatListRepository.getChatListByUserId(chatList.getUserId());
+        chatList1.getSentUser().remove(chatList.getSentUser().get(0));
+
+        ChatDeleted chatDeleted = chatDeletedRepository.getChatDeleted(chatList.getUserId(), chatList.getSentUser().get(0));
+        if(chatDeleted == null){
+            chatDeleted = new ChatDeleted();
+            chatDeleted.setUserId(chatList.getUserId());
+            chatDeleted.setSentUserId(chatList.getSentUser().get(0));
+        }
+        chatDeleted.setTimeDeleted(LocalDateTime.now());
+        chatDeletedRepository.save(chatDeleted);
+
+        chatListRepository.save(chatList1);
     }
 }

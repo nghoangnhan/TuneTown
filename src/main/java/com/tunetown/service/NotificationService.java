@@ -12,8 +12,8 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/private-message")
-    public void receiveMessage(@Payload Message message) {
-        messagingTemplate.convertAndSendToUser(String.valueOf(message.getReceiveUserId()), "", message); // /chat/userId/private
-    }
+//    @MessageMapping("/private-message")
+//    public void receiveMessage(@Payload Message message) {
+//        messagingTemplate.convertAndSendToUser(String.valueOf(message.getReceiveUserId()), "", message); // /chat/userId/private
+//    }
 }
