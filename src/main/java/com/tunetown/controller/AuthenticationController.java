@@ -1,6 +1,5 @@
 package com.tunetown.controller;
 
-import com.tunetown.model.User;
 import com.tunetown.model.authentication.AuthenticationRequest;
 import com.tunetown.model.authentication.AuthenticationResponse;
 import com.tunetown.model.authentication.ForgetPasswordRequest;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -78,9 +76,6 @@ public class AuthenticationController {
 
     @PostMapping(path = "/checkEmailExisted")
     public boolean checkEmailExisted(@RequestParam("userEmail") String userEmail){
-        if(authenticationService.checkEmailExisted(userEmail)){
-            return true;
-        }
-        return false;
+        return authenticationService.checkEmailExisted(userEmail);
     }
 }

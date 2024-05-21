@@ -36,7 +36,12 @@ public class UserController {
     public Map<String, Object> getUserDetails(@RequestParam(required = false, defaultValue = "0") int userId) {
         if(userId == 0)
             return Map.of("users", userService.getAllUsers());
-        return Map.of("user", userService.getUserById(userId));
+        else {
+            User user = userService.getUserById(userId);
+            List<Genre> favouriteGenres = userService.getUserFavouriteGenres(userId);
+            user.setGenres(favouriteGenres);
+            return Map.of("user", userService.getUserById(userId));
+        }
     }
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> modifyUserInformation(@RequestBody User user) {
@@ -117,8 +122,7 @@ public class UserController {
 
     @GetMapping(path = "/getListByName")
     public List<User> getListUserByName(@RequestParam String userName){
-        List<User> listUser = userService.getListUserByName(userName);
-        return listUser;
+        return userService.getListUserByName(userName);
     }
 
     @PutMapping(path = "/modify-favorite-genres")

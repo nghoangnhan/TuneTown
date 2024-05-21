@@ -218,8 +218,7 @@ public class UserService {
     }
 
     public List<User> getListUserByName(String userName){
-        List<User> listUser = userRepository.getListUserByName(userName);
-        return listUser;
+        return userRepository.getListUserByName(userName);
     }
 
     /**
@@ -228,5 +227,8 @@ public class UserService {
     public void modifyUserFavouriteGenres(User user, List<Genre> genres) {
         user.setGenres(genres);
         userRepository.save(user);
+    }
+    public List<Genre> getUserFavouriteGenres(int userId) {
+        return userRepository.getUserFavouriteGenres(userId);
     }
 }
