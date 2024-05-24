@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -28,7 +29,7 @@ public class PlaylistService {
     @Resource
     PlaylistSongsRepository playlistSongsRepository;
 
-    public void addNewPlaylistToUser(int userId) {
+    public void addNewPlaylistToUser(UUID userId) {
         User user = userService.getUserById(userId);
 
         Playlist playlist = new Playlist();
@@ -61,7 +62,7 @@ public class PlaylistService {
         playlistSongsRepository.save(playlistSongs);
     }
 
-    public List<Playlist> getAllPlaylistByUserId(int userId) {
+    public List<Playlist> getAllPlaylistByUserId(UUID userId) {
         return playlistRepository.getAllPlaylistsByUserId(userId);
     }
     public List<PlaylistSongs> getPlaylistSongsById(int playlistId) {

@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApproveRequest {
     private int isApprove;
-    private int hostId;
-    private int approveUserId;
+    private UUID hostId;
+    private UUID approveUserId;
 }

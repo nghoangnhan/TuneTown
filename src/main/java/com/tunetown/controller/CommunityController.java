@@ -10,6 +10,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @Slf4j
@@ -19,7 +20,7 @@ public class CommunityController {
     CommunityService communityService;
 
     @GetMapping("/getByHostId")
-    public Community getCommunityById(@RequestParam("hostId") int hostId){
+    public Community getCommunityById(@RequestParam("hostId") UUID hostId){
         Community community = communityService.getCommunityById(hostId);
         return community;
     }
@@ -31,7 +32,7 @@ public class CommunityController {
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteCommunity(@RequestParam("hostId") int hostId){
+    public ResponseEntity<String> deleteCommunity(@RequestParam("hostId") UUID hostId){
         communityService.deleteCommunity(hostId);
         return ResponseEntity.ok("Community deleted");
     }
@@ -50,13 +51,13 @@ public class CommunityController {
     }
 
     @PostMapping("/joinRequest")
-    public boolean joinRequest(@RequestParam("userId") int userId, @RequestParam("communityId") int communityId){
+    public boolean joinRequest(@RequestParam("userId") UUID userId, @RequestParam("communityId") UUID communityId){
         boolean isRequest = communityService.joinRequest(userId, communityId);
         return !isRequest;
     }
 
     @PostMapping("/outCommunity")
-    public ResponseEntity<String> outCommunity(@RequestParam("userId") int userId, @RequestParam("communityId") int communityId){
+    public ResponseEntity<String> outCommunity(@RequestParam("userId") UUID userId, @RequestParam("communityId") UUID communityId){
         communityService.outCommunity(userId, communityId);
         return ResponseEntity.ok("Community left");
     }
