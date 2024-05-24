@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -21,7 +22,7 @@ public class ChatDeleted {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private int userId;
-    private int sentUserId;
+    private UUID userId;
+    private UUID sentUserId;
     private LocalDateTime timeDeleted;
 }

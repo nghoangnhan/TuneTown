@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -19,9 +20,9 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     private User sendUser;
-    private int receiveUserId;
+    private UUID receiveUserId;
     private String content;
     private LocalDateTime messageDate;
     private int seen; // 0: unseen, 1: seen

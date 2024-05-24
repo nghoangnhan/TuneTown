@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -58,7 +55,7 @@ public class UserService {
             userRepository.save(user);
         }
     }
-    public User getUserById(int userId) {
+    public User getUserById(UUID userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if(optionalUser.isPresent())
             return optionalUser.get();
@@ -98,7 +95,7 @@ public class UserService {
         dbUser.setRole(user.getRole());
     }
 
-    public boolean addToHistory(int userId, int songId){
+    public boolean addToHistory(UUID userId, int songId){
         Optional<User> optionalUser = userRepository.findById(userId);
         if(optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user found with id " + userId);
@@ -128,7 +125,7 @@ public class UserService {
         }
     }
 
-    public List<UserHistory> getHistoryByUserId(int userId){
+    public List<UserHistory> getHistoryByUserId(UUID userId){
         Optional<User> optionalUser = userRepository.findById(userId);
         if(optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user found with id " + userId);
@@ -141,7 +138,7 @@ public class UserService {
      * Get artist id, name, avatar and add the songId list of that artist to Object
      * @return Object with information
      */
-    public Map<String, Object> getArtistDetail(int artistId){
+    public Map<String, Object> getArtistDetail(UUID artistId){
         Optional<User> optionalArtist = userRepository.findById(artistId);
         if(optionalArtist.isEmpty() || !optionalArtist.get().getRole().equals("ARTIST")){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
@@ -165,7 +162,7 @@ public class UserService {
         return artistInfo;
     }
 
-    public boolean deleteUser(int userId, String accessToken){
+    public boolean deleteUser(UUID userId, String accessToken){
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
