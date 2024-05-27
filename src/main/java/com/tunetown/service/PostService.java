@@ -9,13 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.beans.Transient;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -38,21 +37,21 @@ public class PostService {
 
     public void createPost(Post post){
         Optional<User> optionalUser = userRepository.findById(post.getAuthor().getId());
-        if(!optionalUser.isPresent()){
+        if(optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + optionalUser.get().getId() + " does not exists!");
         }
 
         if(post.getSong() != null)
         {
             Optional<Song> optionalSong = songRepository.findById(post.getSong().getId());
-            if(!optionalSong.isPresent()){
+            if(optionalSong.isEmpty()){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Song with id = " + optionalSong.get().getId() + " does not exists!");
             }
         }
 
         if(post.getPlaylist() != null){
             Optional<Playlist> optionalPlaylist = playlistRepository.findById(post.getPlaylist().getId());
-            if(!optionalPlaylist.isPresent()){
+            if(optionalPlaylist.isEmpty()){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist with id = " + optionalPlaylist.get().getId() + " does not exists!");
             }
         }
@@ -61,41 +60,34 @@ public class PostService {
     }
 
     public Page<Post> getAllPosts(Pageable pageable){
-        Page<Post> listPost =  postRepository.getAllPosts(pageable);
-        return listPost;
+        return postRepository.getAllPosts(pageable);
     }
 
     public Page<Post> getPostByAuthorId(int authorId, Pageable pageable){
-        Page<Post> listPost =  postRepository.getPostByAuthorId(authorId, pageable);
-        return listPost;
+        return postRepository.getPostByAuthorId(authorId, pageable);
     }
 
     @Transactional
     public boolean updatePost(Post post, String accessToken){
         Optional<Post> optionalPost = postRepository.findById(post.getId());
-        if(!optionalPost.isPresent()){
+        if(optionalPost.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + post.getId() + " does not exists!");
         }
 
         Post postUpdate = optionalPost.get();
         User user = userRepository.findById(post.getAuthor().getId()).get();
 
-        String token = accessToken.substring(6, accessToken.length());
-        String userEmail = jwtService.extractUserEmail(token.toString());
+        String token = accessToken.substring(6);
+        String userEmail = jwtService.extractUserEmail(token);
         User currentUser = userService.getActiveUserByEmail(userEmail);
 
-        boolean isAuthor = false;
-
-        if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
-            isAuthor = true;
-        }
+        boolean isAuthor = userEmail.equals(user.getEmail()) || currentUser.getRole().equalsIgnoreCase("ADMIN");
 
         if(isAuthor){
             postUpdate.setContent(post.getContent());
             postUpdate.setPostTime(LocalDateTime.now());
             postUpdate.setSong(post.getSong());
             postUpdate.setPlaylist(post.getPlaylist());
-            postUpdate.setMp3Link((postUpdate.getMp3Link()));
             postRepository.save(postUpdate);
             return true;
         }
@@ -106,22 +98,18 @@ public class PostService {
 
     public boolean deletePost(int postId, String accessToken){
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if(!optionalPost.isPresent()){
+        if(optionalPost.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + postId + " does not exists!");
         }
 
         Post post = optionalPost.get();
         User user = userRepository.findById(post.getAuthor().getId()).get();
 
-        String token = accessToken.substring(6, accessToken.length());
-        String userEmail = jwtService.extractUserEmail(token.toString());
+        String token = accessToken.substring(6);
+        String userEmail = jwtService.extractUserEmail(token);
         User currentUser = userService.getActiveUserByEmail(userEmail);
 
-        boolean isAuthor = false;
-
-        if(userEmail.equals(user.getEmail()) || currentUser.getRole().toUpperCase().equals("ADMIN")){
-            isAuthor = true;
-        }
+        boolean isAuthor = userEmail.equals(user.getEmail()) || currentUser.getRole().equalsIgnoreCase("ADMIN");
 
         if(isAuthor){
             postRepository.deleteById(postId);
@@ -141,7 +129,7 @@ public class PostService {
 
     public void addComment(int postId, Comment comment){
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if(!optionalPost.isPresent()){
+        if(optionalPost.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + postId + " does not exists!");
         }
 
@@ -154,12 +142,12 @@ public class PostService {
 
     public void addReply(int postId, int commentId, Comment reply){
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if(!optionalPost.isPresent()){
+        if(optionalPost.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + postId + " does not exists!");
         }
 
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
-        if(!optionalComment.isPresent()){
+        if(optionalComment.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment with id = " + commentId + " does not exists!");
         }
 
@@ -174,12 +162,12 @@ public class PostService {
 
     public int likePost(UUID userId, int postId){
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(!optionalUser.isPresent()){
+        if(optionalUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
         }
 
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if(!optionalPost.isPresent()){
+        if(optionalPost.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + postId + " does not exists!");
         }
 
@@ -200,19 +188,17 @@ public class PostService {
 
     public Post getPostById(int postId){
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if(!optionalPost.isPresent()){
+        if(optionalPost.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id = " + postId + " does not exists!");
         }
-        Post post = optionalPost.get();
-        return post;
+        return optionalPost.get();
     }
 
     public Comment getCommentById(int commentId){
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
-        if(!optionalComment.isPresent()){
+        if(optionalComment.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment with id = " + commentId + " does not exists!");
         }
-        Comment comment = optionalComment.get();
-        return comment;
+        return optionalComment.get();
     }
 }
