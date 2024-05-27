@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -15,9 +17,14 @@ import java.util.List;
 @AllArgsConstructor
 public class Community {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
-    private int communityId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
+    private UUID communityId;
     private String communityName;
     @OneToMany(fetch = FetchType.EAGER)
     private List<User> hosts;
@@ -25,7 +32,7 @@ public class Community {
     private List<User> joinUsers;
     @OneToMany(fetch = FetchType.LAZY)
     private List<User> approveRequests;
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Message> communityMessages;
     private String communityAvatar;
 }

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -28,17 +29,17 @@ public class CommunityService {
     @Resource
     MessageRepository messageRepository;
 
-    public Community getCommunityById(int hostId){
+    public Community getCommunityById(UUID hostId){
         Optional<User> optionalHost = userRepository.findById(hostId);
         if (optionalHost.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community with id = " + hostId + " does not exists!");
         }
-        Community community = communityRepository.getCommunityById(hostId);
+        Community community = communityRepository.getCommunityById(hostId).get();
         return community;
     }
 
     public void createCommunity(Community community){
-        int hostId = community.getHosts().get(0).getId();
+        UUID hostId = community.getHosts().get(0).getId();
         Optional<User> optionalHost = userRepository.findById(hostId);
         if (optionalHost.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Host with id = " + hostId + " does not exists!");
@@ -70,21 +71,21 @@ public class CommunityService {
         }
     }
 
-    public void deleteCommunity(int hostId){
+    public void deleteCommunity(UUID hostId){
         Optional<User> optionalHost = userRepository.findById(hostId);
         if (optionalHost.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Host with id = " + hostId + " does not exists!");
         }
-        Community community = communityRepository.getCommunityById(hostId);
+        Community community = communityRepository.getCommunityById(hostId).get();
         for(User user: community.getJoinUsers()){
             ChatList chatList = chatListRepository.getChatListByUserId(user.getId());
-            chatList.getSentCommunity().remove(Integer.valueOf(community.getCommunityId()));
+            chatList.getSentCommunity().remove(community.getCommunityId());
         }
         communityRepository.delete(community);
     }
 
     public User approveRequest(ApproveRequest approveRequest){
-        Community community = communityRepository.getCommunityById(approveRequest.getHostId());
+        Community community = communityRepository.getCommunityById(approveRequest.getHostId()).get();
         Optional<User> optionalApproveUser = userRepository.findById(approveRequest.getApproveUserId());
         User approveUser = optionalApproveUser.get();
         community.getApproveRequests().remove(approveUser);
@@ -115,7 +116,7 @@ public class CommunityService {
         return approveUser;
     }
 
-    public boolean joinRequest(int userId, int communityId){
+    public boolean joinRequest(UUID userId, UUID communityId){
         Optional<Community> optionalCommunity = communityRepository.findById(communityId);
         if (optionalCommunity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community with id = " + communityId + " does not exists!");
@@ -146,7 +147,7 @@ public class CommunityService {
         return isRequest;
     }
 
-    public void outCommunity(int userId, int communityId){
+    public void outCommunity(UUID userId, UUID communityId){
         Optional<Community> optionalCommunity = communityRepository.findById(communityId);
         if (optionalCommunity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community with id = " + communityId + " does not exists!");
@@ -161,7 +162,7 @@ public class CommunityService {
 
         community.getJoinUsers().remove(user);
         ChatList chatList = chatListRepository.getChatListByUserId(userId);
-        chatList.getSentCommunity().remove(Integer.valueOf(community.getCommunityId()));
+        chatList.getSentCommunity().remove(community.getCommunityId());
         chatListRepository.save(chatList);
         communityRepository.save(community);
     }

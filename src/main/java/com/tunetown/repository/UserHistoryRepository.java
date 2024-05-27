@@ -7,10 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
-public interface UserHistoryRepository extends JpaRepository<UserHistory, Integer> {
+public interface UserHistoryRepository extends JpaRepository<UserHistory, UUID> {
     @Query("SELECT uh FROM UserHistory uh WHERE uh.user.id = ?1")
-    List<UserHistory> getHistoryByUserId(int userId);
+    List<UserHistory> getHistoryByUserId(UUID userId);
 
     @Query("SELECT uh FROM UserHistory uh WHERE uh.dateListen BETWEEN ?1 AND ?2")
     List<UserHistory> getTopSongByPeriod(LocalDateTime startTime, LocalDateTime endTime);

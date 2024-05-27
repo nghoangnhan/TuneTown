@@ -7,8 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u WHERE u.email = ?1")
     Optional<User> getUserByEmail(String email);
 
@@ -16,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> getListUserByEmail(String email);
 
     @Query("SELECT a.id, a.userName, a.avatar FROM User a WHERE a.id = ?1")
-    List<Object[]> getArtistDetail(int artistId);
+    List<Object[]> getArtistDetail(UUID artistId);
 
     @Query("SELECT u FROM User u WHERE u.userName LIKE %:userName%")
     List<User> getListUserByName(String userName);

@@ -172,7 +172,7 @@ public class PostService {
         commentRepository.save(comment);
     }
 
-    public int likePost(int userId, int postId){
+    public int likePost(UUID userId, int postId){
         Optional<User> optionalUser = userRepository.findById(userId);
         if(!optionalUser.isPresent()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface SongRepository extends JpaRepository<Song, Integer> {
     @Query("SELECT s FROM Song s WHERE s.id = ?1")
@@ -23,7 +24,7 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
     List<Song> findSongByNameOrArtist(String songName, String artistName);
 
     @Query("SELECT s FROM Song s JOIN s.artists a WHERE a.id = ?1")
-    List<Song> songListByArtist(int artistId);
+    List<Song> songListByArtist(UUID artistId);
 
     @Query(value =
             "SELECT * FROM (" +
@@ -37,5 +38,5 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
                         "FROM song s " +
                         "JOIN user_history uh ON s.id = uh.song_id)) as s " +
             "ORDER BY s.listens DESC LIMIT 100", nativeQuery = true)
-    List<Song> getListRecommendedSong(int userId);
+    List<Song> getListRecommendedSong(UUID userId);
 }

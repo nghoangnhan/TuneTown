@@ -30,7 +30,7 @@ public class MessageService {
     @Resource
     CommunityRepository communityRepository;
 
-    public boolean sendMessage(int sendUserId, int receiveUserId, String content){
+    public boolean sendMessage(UUID sendUserId, UUID receiveUserId, String content){
         Optional<Community> optionalCommunity = Optional.ofNullable(new Community());
         Optional<User> optionalUser = userRepository.findById(sendUserId);
         if (!optionalUser.isPresent()){
@@ -61,7 +61,7 @@ public class MessageService {
                     chatListSent.setUserId(sendUserId);
                 }
 
-                List<Integer> sentUserList = chatListSent.getSentUser();
+                List<UUID> sentUserList = chatListSent.getSentUser();
                 if (sentUserList == null) {
                     sentUserList = new ArrayList<>(); // Initialize the list if it's null
                 }
@@ -75,7 +75,7 @@ public class MessageService {
                     chatListReceived = new ChatList();
                     chatListReceived.setUserId(receiveUserId);
                 }
-                List<Integer> receiveUserList = chatListReceived.getSentUser();
+                List<UUID> receiveUserList = chatListReceived.getSentUser();
 
 
                 // Re-order chat list of received user
@@ -119,7 +119,7 @@ public class MessageService {
         return false;
     }
 
-    public Map<String, Object> loadMessage(int userId, int sentId){
+    public Map<String, Object> loadMessage(UUID userId, UUID sentId){
         Optional<Community> optionalCommunity = Optional.ofNullable(new Community());
         Optional<User> optionalUser = userRepository.findById(userId);
         if (!optionalUser.isPresent()){
@@ -178,7 +178,7 @@ public class MessageService {
         return messageUserInfo;
     }
 
-    public Map<String, Object> loadChatList(int userId){
+    public Map<String, Object> loadChatList(UUID userId){
         ChatList chatList = chatListRepository.getChatListByUserId(userId);
         List<Message> messageList = new ArrayList<>();
         Map<String, Object> chatListInfo = new LinkedHashMap<>(); // LinkedHashMap() to use ordered list as input
@@ -190,7 +190,7 @@ public class MessageService {
 
         // Check sentUser list null
         if(chatList.getSentUser() != null){
-            for(int id: chatList.getSentUser()){
+            for(UUID id: chatList.getSentUser()){
                 User user = userRepository.findById(id).get();
                 if(user != null) {
                     messageList = messageRepository.getMessageByUserId(userId, id);
@@ -205,10 +205,10 @@ public class MessageService {
             }
         }
         if(chatList.getSentCommunity() != null){
-            for(int hostId: chatList.getSentCommunity()){
-                Community community = communityService.getCommunityById(hostId);
+            for(UUID hostId: chatList.getSentCommunity()){
+                Community community = communityRepository.getCommunityById(hostId).get();
                 if(community != null) {
-                    messageList = messageRepository.getMessageByUserId(community.getId(), userId);
+                    messageList = messageRepository.getMessageByUserId(userId, community.getId());
                     if (!messageList.isEmpty()) {
                         Message lastMessage = community.getCommunityMessages().get(community.getCommunityMessages().size() - 1);
                         Map<String, Object> communityChatInfo = new HashMap<>();
@@ -243,8 +243,8 @@ public class MessageService {
         return sortedChatListInfo;
     }
 
-    public List<Message> findMessageByContent(String content, int userId, int sentUserId){
-        List<Message> messageFound = messageRepository.findMessageByContent(content,userId,sentUserId);
+    public List<Message> findMessageByContent(String content, UUID userId, UUID sentUserId){
+        List<Message> messageFound = messageRepository.findMessageByContent(content, userId, sentUserId);
         Collections.reverse(messageFound); // Reverse the order of the list
         return messageFound;
     }

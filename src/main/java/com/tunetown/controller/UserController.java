@@ -17,6 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -33,14 +35,14 @@ public class UserController {
     }
 
     @GetMapping
-    public Map<String, Object> getUserDetails(@RequestParam(required = false, defaultValue = "0") int userId) {
-        if(userId == 0)
+    public Map<String, Object> getUserDetails(@RequestParam(required = false, defaultValue = "default") String userId) {
+        if(userId.equals("default"))
             return Map.of("users", userService.getAllUsers());
         else {
-            User user = userService.getUserById(userId);
-            List<Genre> favouriteGenres = userService.getUserFavouriteGenres(userId);
+            User user = userService.getUserById(UUID.fromString(userId)));
+            List<Genre> favouriteGenres = userService.getUserFavouriteGenres(UUID.fromString(userId)));
             user.setGenres(favouriteGenres);
-            return Map.of("user", userService.getUserById(userId));
+            return Map.of("user", user);
         }
     }
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -69,7 +71,7 @@ public class UserController {
 
 
     @PostMapping(path = "/addToHistory")
-    public ResponseEntity<String> addToHistory(@RequestParam("userId") int userId, @RequestParam("songId") int songId){
+    public ResponseEntity<String> addToHistory(@RequestParam("userId") UUID userId, @RequestParam("songId") int songId){
         if(userService.addToHistory(userId, songId)){
             return ResponseEntity.ok("Added to history!");
         } else {
@@ -78,17 +80,17 @@ public class UserController {
     }
 
     @PostMapping(path = "/getHistory")
-    public List<UserHistory> getHistoryByUserId(@RequestParam("userId") int userId){
+    public List<UserHistory> getHistoryByUserId(@RequestParam("userId") UUID userId){
         return userService.getHistoryByUserId(userId);
     }
 
     @PostMapping(path = "/getArtistDetail")
-    public Map<String, Object> getArtistDetail(@RequestParam("artistId") int artistId){
+    public Map<String, Object> getArtistDetail(@RequestParam("artistId") UUID artistId){
         return userService.getArtistDetail(artistId);
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteUser(@RequestParam("userId") int userId, @RequestHeader("Authorization") String accessToken){
+    public ResponseEntity<String> deleteUser(@RequestParam("userId") UUID userId, @RequestHeader("Authorization") String accessToken){
         if(accessToken.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token is missing!");
         }

@@ -11,6 +11,7 @@ import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class FollowerService {
@@ -31,13 +32,13 @@ public class FollowerService {
         else
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error on unfollowing a user");
     }
-    public int getNumberOfFollowers(int subjectId) {
+    public int getNumberOfFollowers(UUID subjectId) {
         return followerRepository.getNumberOfFollowers(subjectId);
     }
-    public int getNumberOfFollowing(int followerId) {
+    public int getNumberOfFollowing(UUID followerId) {
         return followerRepository.getNumberOfFollowing(followerId);
     }
-    public List<User> getListOfRelatedUsers(int subjectId, int followerId) {
+    public List<User> getListOfRelatedUsers(UUID subjectId, UUID followerId) {
         return followerRepository.getListOfRelatedUsers(subjectId, followerId);
     }
 }

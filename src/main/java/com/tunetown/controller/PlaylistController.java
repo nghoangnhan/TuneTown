@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/playlists")
@@ -26,7 +27,7 @@ public class PlaylistController {
     UserService userService;
 
     @GetMapping("/getUserPlaylists")
-    public List<Playlist> getAllPlaylistByUserId(@RequestParam int userId) {
+    public List<Playlist> getAllPlaylistByUserId(@RequestParam UUID userId) {
         return playlistService.getAllPlaylistByUserId(userId);
     }
 
@@ -45,7 +46,7 @@ public class PlaylistController {
     }
 
     @PostMapping
-    public void addNewPlaylist(@RequestParam int userId) {
+    public void addNewPlaylist(@RequestParam UUID userId) {
         playlistService.addNewPlaylistToUser(userId);
     }
 

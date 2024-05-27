@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/messages")
@@ -35,7 +36,7 @@ public class MessageController {
     }
 
     @GetMapping (path = "/loadChatList")
-    public Map<String, Object> loadChatList(@RequestParam("userId") int userId){
+    public Map<String, Object> loadChatList(@RequestParam("userId") UUID userId){
         Map<String, Object> chatListInfo = messageService.loadChatList(userId);
         return chatListInfo;
     }

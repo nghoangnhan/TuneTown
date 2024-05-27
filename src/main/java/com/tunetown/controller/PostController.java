@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/post")
@@ -80,7 +81,7 @@ public class PostController {
     }
 
     @PostMapping("/likePost")
-    public ResponseEntity<String> likePost(@RequestParam int userId, @RequestParam int postId){
+    public ResponseEntity<String> likePost(@RequestParam UUID userId, @RequestParam int postId){
         if(postService.likePost(userId, postId) == 0){
             return ResponseEntity.ok("Post liked!");
         }
