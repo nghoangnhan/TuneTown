@@ -18,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -39,8 +38,8 @@ public class UserController {
         if(userId.equals("default"))
             return Map.of("users", userService.getAllUsers());
         else {
-            User user = userService.getUserById(UUID.fromString(userId)));
-            List<Genre> favouriteGenres = userService.getUserFavouriteGenres(UUID.fromString(userId)));
+            User user = userService.getUserById(UUID.fromString(userId));
+            List<Genre> favouriteGenres = userService.getUserFavouriteGenres(UUID.fromString(userId));
             user.setGenres(favouriteGenres);
             return Map.of("user", user);
         }

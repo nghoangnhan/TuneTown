@@ -23,5 +23,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> getListUserByName(String userName);
 
     @Query("SELECT u.genres FROM User u WHERE u.id = ?1")
-    List<Genre> getUserFavouriteGenres(int userId);
+    List<Genre> getUserFavouriteGenres(UUID userId);
 }

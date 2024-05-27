@@ -225,7 +225,7 @@ public class UserService {
         user.setGenres(genres);
         userRepository.save(user);
     }
-    public List<Genre> getUserFavouriteGenres(int userId) {
+    public List<Genre> getUserFavouriteGenres(UUID userId) {
         return userRepository.getUserFavouriteGenres(userId);
     }
 }
