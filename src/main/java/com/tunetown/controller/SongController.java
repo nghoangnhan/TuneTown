@@ -1,7 +1,6 @@
 package com.tunetown.controller;
 
 import com.tunetown.model.Genre;
-import com.tunetown.model.Post;
 import com.tunetown.model.Song;
 import com.tunetown.service.FirebaseStorageService;
 import com.tunetown.service.SongService;
@@ -151,11 +150,5 @@ public class SongController {
     @GetMapping("/getAllGenres")
     public List<Genre> getALlGenres(){
         return songService.getAllGenres();
-    }
-
-    @PostMapping("/combineData")
-    public byte[] combineData(@RequestParam("songId") int songId, @RequestBody Post post){
-        byte[] combineFile = firebaseStorageService.combineMP3(songId, post.getMp3Link());
-        return combineFile;
     }
 }
