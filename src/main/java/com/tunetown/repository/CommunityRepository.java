@@ -17,4 +17,7 @@ public interface CommunityRepository extends JpaRepository<Community, UUID> {
 
     @Query("SELECT c FROM Community c WHERE c.communityName LIKE %:communityName%")
     List<Community> searchCommunityByName(String communityName);
+
+    @Query("SELECT Count(c) FROM Community c Where c.communityId = ?1")
+    int checkCommunityExist(UUID artistId);
 }

@@ -33,6 +33,8 @@ public class UserService {
     PlaylistRepository playlistRepository;
     @Resource
     FollowerService followerService;
+    @Resource
+    CommunityRepository communityRepository;
 
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -238,5 +240,9 @@ public class UserService {
     }
     public List<Genre> getUserFavouriteGenres(UUID userId) {
         return userRepository.getUserFavouriteGenres(userId);
+    }
+
+    public int checkCommunityExist(UUID artistId){
+        return communityRepository.checkCommunityExist(artistId);
     }
 }

@@ -137,4 +137,9 @@ public class UserController {
         userService.modifyUserFavouriteGenres(user, genres);
         return ResponseEntity.ok("Modified");
     }
+
+    @PostMapping(path = "/checkCommunityExist")
+    public int checkCommunityExist(@RequestParam("artistId") UUID artistId){
+        return userService.checkCommunityExist(artistId);
+    }
 }
