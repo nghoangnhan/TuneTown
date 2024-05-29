@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/songs")
@@ -150,5 +151,10 @@ public class SongController {
     @GetMapping("/getAllGenres")
     public List<Genre> getALlGenres(){
         return songService.getAllGenres();
+    }
+
+    @GetMapping("/getSongsByArtist")
+    public List<Song> getSongsByArtist(@RequestParam UUID artistID, @RequestParam(defaultValue = "1") int pageNo) {
+        return songService.getSongsByArtist(artistID, pageNo);
     }
 }

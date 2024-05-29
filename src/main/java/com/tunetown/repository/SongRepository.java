@@ -24,7 +24,13 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
     List<Song> findSongByNameOrArtist(String songName, String artistName);
 
     @Query("SELECT s FROM Song s JOIN s.artists a WHERE a.id = ?1")
-    List<Song> songListByArtist(UUID artistId);
+    List<Song> songListByArtist(UUID artistId, Pageable pageable);
+
+    @Query("SELECT s FROM Song s JOIN s.artists a WHERE a.id = ?1")
+    List<Song> getAllSongsOfArtist(UUID artistId);
+
+    @Query("SELECT s FROM Song s JOIN s.artists a WHERE a.id = ?1 ORDER BY s.listens")
+    List<Song> getTopSongsOfArtist(UUID artistID, Pageable pageable);
 
     @Query(value =
             "SELECT * FROM (" +
