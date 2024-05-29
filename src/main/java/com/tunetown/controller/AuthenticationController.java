@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.Resource;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -42,13 +41,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 
-    //TODO: need to be implemented
-    @PostMapping("/verifyAccessToken")
-    public Map<String, Object> verifyAccessToken() {
-        return Map.of(
-                "access_token", ""
-        );
-    }
+    /**
+     * Check the access token is whether expired or not
+     * Return 403 if the token is expired or 200 reversely
+     */
+    @PostMapping("/checkToken")
+    public void checkToken() {}
 
     @PostMapping(path = "/forgetPassword",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> forgetPassword(@RequestBody ForgetPasswordRequest forgetPasswordRequest) {
