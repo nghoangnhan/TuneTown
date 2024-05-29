@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,4 +26,9 @@ public class Follower {
 
     @Temporal(TemporalType.DATE)
     private LocalDate followedDate;
+
+    public Follower(UUID followerId, UUID subjectId) {
+        this.follower = new User(followerId);
+        this.subject = new User(subjectId);
+    }
 }

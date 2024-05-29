@@ -6,6 +6,7 @@ import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -138,15 +139,16 @@ public class UserService {
      * Get artist id, name, avatar and add the songId list of that artist to Object
      * @return Object with information
      */
-    public Map<String, Object> getArtistDetail(UUID artistId){
+    public Map<String, Object> getArtistDetail(UUID artistId, UUID userId) {
         Optional<User> optionalArtist = userRepository.findById(artistId);
         if(optionalArtist.isEmpty() || !optionalArtist.get().getRole().equals("ARTIST")){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
         }
 
         List<Object[]> artistDetailList = userRepository.getArtistDetail(artistId);
-        List<Song> songList = songRepository.songListByArtist(artistId);
         Object[] artistDetails = artistDetailList.get(0);
+
+        List<Song> topTracks = songRepository.getTopSongsOfArtist(artistId, Pageable.ofSize(10));
 
         int numberOfFollowers = followerService.getNumberOfFollowers(artistId);
         int numberOfFollowing = followerService.getNumberOfFollowing(artistId);
@@ -155,7 +157,16 @@ public class UserService {
         artistInfo.put("id", artistDetails[0]);
         artistInfo.put("name", artistDetails[1]);
         artistInfo.put("avatar", artistDetails[2]);
-        artistInfo.put("songs", songList);
+        artistInfo.put("songs", topTracks);
+
+        Optional<Follower> optionalFollower = followerService.getFollowInformation(userId, artistId);
+        if(optionalFollower.isPresent()) {
+            artistInfo.put("isFollowed", true);
+            artistInfo.put("followedSince", optionalFollower.get().getFollowedDate());
+        }
+        else {
+            artistInfo.put("isFollowed", false);
+        }
         artistInfo.put("followers", numberOfFollowers);
         artistInfo.put("following", numberOfFollowing);
 
@@ -178,7 +189,7 @@ public class UserService {
             }
 
             // Delete all the song of user relevant
-            List<Song> songList = songRepository.songListByArtist(userId);
+            List<Song> songList = songRepository.getAllSongsOfArtist(userId);
             if(!songList.isEmpty()){
                 for (Song song : songList
                      ) {

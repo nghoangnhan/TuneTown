@@ -12,6 +12,7 @@ import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -249,5 +250,11 @@ public class SongService {
      */
     public List<Song> getRecommendedSongs(User user) {
         return songRepository.getListRecommendedSong(user.getId());
+    }
+
+
+    public List<Song> getSongsByArtist(UUID artistID, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 10);
+        return songRepository.songListByArtist(artistID, pageable);
     }
 }
