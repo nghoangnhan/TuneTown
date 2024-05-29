@@ -37,4 +37,8 @@ public class User {
 
     @ManyToMany
     private List<Genre> genres;
+
+    public User(UUID userId) {
+        this.id = userId;
+    }
 }

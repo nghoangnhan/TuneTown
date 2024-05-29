@@ -6,6 +6,7 @@ import com.tunetown.model.User;
 import com.tunetown.model.UserHistory;
 import com.tunetown.service.FollowerService;
 import com.tunetown.service.UserService;
+import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -25,6 +27,8 @@ import java.util.UUID;
 public class UserController {
     @Resource
     UserService userService;
+    @Resource
+    JwtService jwtService;
     @Resource
     FollowerService followerService;
 
@@ -84,8 +88,11 @@ public class UserController {
     }
 
     @PostMapping(path = "/getArtistDetail")
-    public Map<String, Object> getArtistDetail(@RequestParam("artistId") UUID artistId){
-        return userService.getArtistDetail(artistId);
+    public Map<String, Object> getArtistDetail(@RequestParam("artistId") UUID artistId, @RequestHeader("Authorization") String accessToken){
+        String token = accessToken.substring(6);
+        String email = jwtService.extractUserEmail(token);
+        User user = userService.getActiveUserByEmail(email);
+        return userService.getArtistDetail(artistId, user.getId());
     }
 
     @DeleteMapping
@@ -99,26 +106,24 @@ public class UserController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not the admin!");
     }
 
-    @PostMapping(path = "/follow")
-    public ResponseEntity<String> followUser(@RequestBody Follower follower) {
-        if(follower.getFollower() == null || follower.getSubject() == null )
+    @GetMapping(path = "/follow")
+    public ResponseEntity<String> followUser(@RequestParam UUID userId, @RequestHeader("Authorization") String accessToken) {
+        if(userId == null )
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required arguments");
 
-        try {
-            followerService.follow(follower);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error on following a user");
+        String token = accessToken.substring(6);
+        String email = jwtService.extractUserEmail(token);
+        User user = userService.getActiveUserByEmail(email);
+
+        Optional<Follower> optionalFollower = followerService.getFollowInformation(user.getId(), userId);
+        if(optionalFollower.isEmpty()) {
+            followerService.follow(new Follower(user.getId(), userId));
+            return ResponseEntity.ok("Followed");
         }
-        return ResponseEntity.ok("Followed");
-    }
-
-    @DeleteMapping(path = "/unfollow")
-    public ResponseEntity<String> unfollowUser(@RequestBody Follower follower) {
-        if(follower.getFollower() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required arguments");
-        followerService.unfollow(follower);
-        return ResponseEntity.ok("Unfollowed");
+        else {
+            followerService.unfollow(optionalFollower.get());
+            return ResponseEntity.ok("Unfollowed");
+        }
     }
 
     @GetMapping(path = "/getListByName")

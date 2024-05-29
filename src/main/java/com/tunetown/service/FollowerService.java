@@ -3,9 +3,7 @@ package com.tunetown.service;
 import com.tunetown.model.Follower;
 import com.tunetown.model.User;
 import com.tunetown.repository.FollowerRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
@@ -26,11 +24,7 @@ public class FollowerService {
         followerRepository.save(follower);
     }
     public void unfollow(Follower follower) {
-        Optional<Follower> optionalFollower = followerRepository.getFollowerObject(follower.getFollower().getId(), follower.getSubject().getId());
-        if (optionalFollower.isPresent())
-            followerRepository.delete(optionalFollower.get());
-        else
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error on unfollowing a user");
+        followerRepository.delete(follower);
     }
     public int getNumberOfFollowers(UUID subjectId) {
         return followerRepository.getNumberOfFollowers(subjectId);
@@ -40,5 +34,9 @@ public class FollowerService {
     }
     public List<User> getListOfRelatedUsers(UUID subjectId, UUID followerId) {
         return followerRepository.getListOfRelatedUsers(subjectId, followerId);
+    }
+
+    public Optional<Follower> getFollowInformation(UUID followerId, UUID subjectId) {
+        return followerRepository.getFollowerObject(followerId, subjectId);
     }
 }
