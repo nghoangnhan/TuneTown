@@ -9,7 +9,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserHistoryRepository extends JpaRepository<UserHistory, UUID> {
-    @Query("SELECT uh FROM UserHistory uh WHERE uh.user.id = ?1 ORDER BY uh.dateListen DESC")
+    @Query("SELECT new UserHistory (uh.song, MAX(uh.dateListen)) FROM UserHistory uh " +
+            "WHERE uh.user.id = ?1 " +
+            "GROUP BY uh.song " +
+            "ORDER BY MAX(uh.dateListen) DESC")
     List<UserHistory> getHistoryByUserId(UUID userId);
 
     @Query("SELECT uh FROM UserHistory uh WHERE uh.dateListen BETWEEN ?1 AND ?2")
