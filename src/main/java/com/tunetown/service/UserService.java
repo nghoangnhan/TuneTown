@@ -139,7 +139,7 @@ public class UserService {
      * Get artist id, name, avatar and add the songId list of that artist to Object
      * @return Object with information
      */
-    public Map<String, Object> getArtistDetail(UUID artistId, UUID userId) {
+    public Map<String, Object> getArtistDetail(UUID artistId, User user) {
         Optional<User> optionalArtist = userRepository.findById(artistId);
         if(optionalArtist.isEmpty() || !optionalArtist.get().getRole().equals("ARTIST")){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
@@ -157,9 +157,10 @@ public class UserService {
         artistInfo.put("id", artistDetails[0]);
         artistInfo.put("name", artistDetails[1]);
         artistInfo.put("avatar", artistDetails[2]);
+        artistInfo.put("bio", user.getUserBio());
         artistInfo.put("songs", topTracks);
 
-        Optional<Follower> optionalFollower = followerService.getFollowInformation(userId, artistId);
+        Optional<Follower> optionalFollower = followerService.getFollowInformation(user.getId(), artistId);
         if(optionalFollower.isPresent()) {
             artistInfo.put("isFollowed", true);
             artistInfo.put("followedSince", optionalFollower.get().getFollowedDate());
