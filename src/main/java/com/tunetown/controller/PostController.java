@@ -41,7 +41,7 @@ public class PostController {
         );
     }
     @GetMapping("/getByAuthorId")
-    public Map<String, Object> getPostByAuthorId(@RequestParam int authorId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
+    public Map<String, Object> getPostByAuthorId(@RequestParam UUID authorId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         Page<Post> postPage = postService.getPostByAuthorId(authorId, pageRequest);
         return Map.of(
