@@ -253,7 +253,7 @@ public class SongService {
     }
 
 
-    public List<Song> getSongsByArtist(UUID artistID, int pageNo) {
+    public Page<Song> getSongsByArtist(UUID artistID, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo - 1, 10);
         return songRepository.songListByArtist(artistID, pageable);
     }

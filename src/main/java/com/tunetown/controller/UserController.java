@@ -92,7 +92,7 @@ public class UserController {
         String token = accessToken.substring(6);
         String email = jwtService.extractUserEmail(token);
         User user = userService.getActiveUserByEmail(email);
-        return userService.getArtistDetail(artistId, user.getId());
+        return userService.getArtistDetail(artistId, user);
     }
 
     @DeleteMapping

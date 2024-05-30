@@ -154,7 +154,13 @@ public class SongController {
     }
 
     @GetMapping("/getSongsByArtist")
-    public List<Song> getSongsByArtist(@RequestParam UUID artistID, @RequestParam(defaultValue = "1") int pageNo) {
-        return songService.getSongsByArtist(artistID, pageNo);
+    public Map<String, Object> getSongsByArtist(@RequestParam UUID artistID, @RequestParam(defaultValue = "1") int pageNo) {
+        Page<Song> songPage = songService.getSongsByArtist(artistID, pageNo);
+        int page = songPage.getNumber();
+        List<Song> songList = songPage.getContent();
+        return Map.of(
+                "pageNo", page + 1,
+                "songList", songList
+        );
     }
 }

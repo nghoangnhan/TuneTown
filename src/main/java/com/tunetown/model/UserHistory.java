@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 @Entity
 @Getter
@@ -24,4 +22,9 @@ public class UserHistory {
     @ManyToOne(fetch = FetchType.EAGER)
     private Song song;
     private LocalDateTime dateListen;
+
+    public UserHistory(Song song, LocalDateTime dateListen) {
+        this.song = song;
+        this.dateListen = dateListen;
+    }
 }
