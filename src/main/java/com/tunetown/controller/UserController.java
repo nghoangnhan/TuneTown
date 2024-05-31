@@ -9,6 +9,7 @@ import com.tunetown.service.UserService;
 import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -124,6 +125,32 @@ public class UserController {
             followerService.unfollow(optionalFollower.get());
             return ResponseEntity.ok("Unfollowed");
         }
+    }
+
+    @GetMapping(path="/following")
+    public Map<String, Object> getUserFollowing(@RequestParam(defaultValue = "1") int pageNo, @RequestHeader("Authorization") String accessToken) {
+        String token = accessToken.substring(6);
+        String email = jwtService.extractUserEmail(token);
+        User user = userService.getActiveUserByEmail(email);
+
+        Page<Follower> followerPage = followerService.getUserFollowing(user.getId(), pageNo - 1);
+        return Map.of(
+                "pageNo", followerPage.getNumber() + 1,
+                "following", followerPage.getContent()
+        );
+    }
+
+    @GetMapping(path="/followers")
+    public Map<String, Object> getUserFollowers(@RequestParam(defaultValue = "1") int pageNo, @RequestHeader("Authorization") String accessToken) {
+        String token = accessToken.substring(6);
+        String email = jwtService.extractUserEmail(token);
+        User user = userService.getActiveUserByEmail(email);
+
+        Page<Follower> followerPage = followerService.getUserFollowers(user.getId(), pageNo - 1);
+        return Map.of(
+                "pageNo", followerPage.getNumber() + 1,
+                "followers", followerPage.getContent()
+        );
     }
 
     @GetMapping(path = "/getListByName")
