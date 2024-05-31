@@ -2,10 +2,11 @@ package com.tunetown.controller;
 
 import com.tunetown.model.Comment;
 import com.tunetown.model.Post;
-import com.tunetown.model.Song;
+import com.tunetown.model.User;
 import com.tunetown.service.PostService;
+import com.tunetown.service.UserService;
+import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,10 @@ import java.util.UUID;
 public class PostController {
     @Resource
     PostService postService;
+    @Resource
+    JwtService jwtService;
+    @Resource
+    UserService userService;
     @PostMapping("/create")
     public ResponseEntity<String> createPost(@RequestBody Post post){
         postService.createPost(post);
@@ -30,9 +35,14 @@ public class PostController {
     }
 
     @GetMapping
-    public Map<String, Object> getAllPosts(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
+    public Map<String, Object> getAllPosts(@RequestParam(defaultValue = "1") int page,
+                                           @RequestParam(defaultValue = "10") int size,
+                                           @RequestHeader("Authorization") String accessToken){
+        String email = jwtService.extractUserEmail(accessToken.substring(6));
+        User user = userService.getActiveUserByEmail(email);
+
         PageRequest pageRequest = PageRequest.of(page - 1, size);
-        Page<Post> postPage = postService.getAllPosts(pageRequest);
+        Page<Post> postPage = postService.getAllPosts(user.getId(), pageRequest);
         return Map.of(
                 "postList", postPage.getContent(),
                 "currentPage", postPage.getNumber() + 1,
