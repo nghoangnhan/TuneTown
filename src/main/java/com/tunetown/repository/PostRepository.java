@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("SELECT p FROM Post p " +
             "WHERE p.author.id IN (SELECT f.subject.id FROM Follower f WHERE f.follower.id = ?1) " +
+            "OR p.author.id = ?1 " +
             "ORDER BY p.postTime DESC")
     Page<Post> getAllPosts(UUID userId, Pageable pageable);
 
