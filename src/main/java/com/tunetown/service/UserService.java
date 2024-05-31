@@ -143,7 +143,7 @@ public class UserService {
      */
     public Map<String, Object> getArtistDetail(UUID artistId, User user) {
         Optional<User> optionalArtist = userRepository.findById(artistId);
-        if(optionalArtist.isEmpty() || !optionalArtist.get().getRole().equals("ARTIST")){
+        if(optionalArtist.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No artist found with id " + artistId);
         }
 
