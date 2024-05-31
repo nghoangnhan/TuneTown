@@ -3,7 +3,6 @@ package com.tunetown.repository;
 import com.tunetown.model.Follower;
 import com.tunetown.model.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -27,8 +26,8 @@ public interface FollowerRepository extends JpaRepository<Follower, Integer> {
     Optional<Follower> getFollowerObject(UUID followerId, UUID subjectId);
 
     @Query("SELECT f FROM Follower f WHERE f.follower.id = ?1")
-    Page<Follower> getUserFollowing(UUID userId, Pageable pageable);
+    Page<Follower> getUserFollowing(UUID userId);
 
     @Query("SELECT f FROM Follower f WHERE f.subject.id = ?1")
-    Page<Follower> getUserFollowers(UUID userId, Pageable pageable);
+    Page<Follower> getUserFollowers(UUID userId);
 }

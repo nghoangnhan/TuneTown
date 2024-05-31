@@ -128,19 +128,17 @@ public class UserController {
     }
 
     @GetMapping(path="/following")
-    public Map<String, Object> getUserFollowing(@RequestParam(defaultValue = "1") int pageNo, @RequestParam UUID userId) {
-        Page<Follower> followerPage = followerService.getUserFollowing(userId, pageNo - 1);
+    public Map<String, Object> getUserFollowing(@RequestParam UUID userId) {
+        Page<Follower> followerPage = followerService.getUserFollowing(userId);
         return Map.of(
-                "pageNo", followerPage.getNumber() + 1,
                 "following", followerPage.getContent()
         );
     }
 
     @GetMapping(path="/followers")
-    public Map<String, Object> getUserFollowers(@RequestParam(defaultValue = "1") int pageNo, @RequestParam UUID userId) {
-        Page<Follower> followerPage = followerService.getUserFollowers(userId, pageNo - 1);
+    public Map<String, Object> getUserFollowers(@RequestParam UUID userId) {
+        Page<Follower> followerPage = followerService.getUserFollowers(userId);
         return Map.of(
-                "pageNo", followerPage.getNumber() + 1,
                 "followers", followerPage.getContent()
         );
     }
