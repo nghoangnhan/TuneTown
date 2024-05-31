@@ -128,12 +128,8 @@ public class UserController {
     }
 
     @GetMapping(path="/following")
-    public Map<String, Object> getUserFollowing(@RequestParam(defaultValue = "1") int pageNo, @RequestHeader("Authorization") String accessToken) {
-        String token = accessToken.substring(6);
-        String email = jwtService.extractUserEmail(token);
-        User user = userService.getActiveUserByEmail(email);
-
-        Page<Follower> followerPage = followerService.getUserFollowing(user.getId(), pageNo - 1);
+    public Map<String, Object> getUserFollowing(@RequestParam(defaultValue = "1") int pageNo, @RequestParam UUID userId) {
+        Page<Follower> followerPage = followerService.getUserFollowing(userId, pageNo - 1);
         return Map.of(
                 "pageNo", followerPage.getNumber() + 1,
                 "following", followerPage.getContent()
@@ -141,12 +137,8 @@ public class UserController {
     }
 
     @GetMapping(path="/followers")
-    public Map<String, Object> getUserFollowers(@RequestParam(defaultValue = "1") int pageNo, @RequestHeader("Authorization") String accessToken) {
-        String token = accessToken.substring(6);
-        String email = jwtService.extractUserEmail(token);
-        User user = userService.getActiveUserByEmail(email);
-
-        Page<Follower> followerPage = followerService.getUserFollowers(user.getId(), pageNo - 1);
+    public Map<String, Object> getUserFollowers(@RequestParam(defaultValue = "1") int pageNo, @RequestParam UUID userId) {
+        Page<Follower> followerPage = followerService.getUserFollowers(userId, pageNo - 1);
         return Map.of(
                 "pageNo", followerPage.getNumber() + 1,
                 "followers", followerPage.getContent()
