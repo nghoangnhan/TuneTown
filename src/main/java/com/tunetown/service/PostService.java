@@ -59,8 +59,8 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public Page<Post> getAllPosts(Pageable pageable){
-        return postRepository.getAllPosts(pageable);
+    public Page<Post> getAllPosts(UUID userId, Pageable pageable){
+        return postRepository.getAllPosts(userId, pageable);
     }
 
     public Page<Post> getPostByAuthorId(UUID authorId, Pageable pageable){

@@ -9,7 +9,6 @@ import com.tunetown.service.UserService;
 import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -129,17 +128,15 @@ public class UserController {
 
     @GetMapping(path="/following")
     public Map<String, Object> getUserFollowing(@RequestParam UUID userId) {
-        Page<Follower> followerPage = followerService.getUserFollowing(userId);
         return Map.of(
-                "following", followerPage.getContent()
+                "following", followerService.getUserFollowing(userId)
         );
     }
 
     @GetMapping(path="/followers")
     public Map<String, Object> getUserFollowers(@RequestParam UUID userId) {
-        Page<Follower> followerPage = followerService.getUserFollowers(userId);
         return Map.of(
-                "followers", followerPage.getContent()
+                "followers", followerService.getUserFollowers(userId)
         );
     }
 

@@ -3,7 +3,6 @@ package com.tunetown.service;
 import com.tunetown.model.Follower;
 import com.tunetown.model.User;
 import com.tunetown.repository.FollowerRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -41,11 +40,11 @@ public class FollowerService {
         return followerRepository.getFollowerObject(followerId, subjectId);
     }
 
-    public Page<Follower> getUserFollowing(UUID userId) {
+    public List<Follower> getUserFollowing(UUID userId) {
         return followerRepository.getUserFollowing(userId);
     }
 
-    public Page<Follower> getUserFollowers(UUID userId) {
+    public List<Follower> getUserFollowers(UUID userId) {
         return followerRepository.getUserFollowers(userId);
     }
 }
