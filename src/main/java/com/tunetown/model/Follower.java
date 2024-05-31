@@ -19,9 +19,9 @@ public class Follower {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private User follower;
-    @OneToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private User subject;
 
     @Temporal(TemporalType.DATE)
