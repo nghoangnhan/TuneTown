@@ -15,6 +15,10 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "ORDER BY p.postTime DESC")
     Page<Post> getAllPosts(UUID userId, Pageable pageable);
 
+    @Query("SELECT p FROM Post p " +
+            "ORDER BY p.postTime DESC ")
+    Page<Post> getPostsByAdmin(Pageable pageable);
+
     @Query("SELECT p FROM Post p WHERE p.author.id = ?1 ORDER BY p.postTime DESC")
     Page<Post> getPostByAuthorId(UUID authorId, Pageable pageable);
 }

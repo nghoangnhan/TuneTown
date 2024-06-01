@@ -257,4 +257,9 @@ public class SongService {
         Pageable pageable = PageRequest.of(pageNo - 1, 10);
         return songRepository.songListByArtist(artistID, pageable);
     }
+
+    public List<Song> getSongsForListenAgain(UUID userId) {
+        Pageable pageable = Pageable.ofSize(20);
+        return songRepository.getSongsForListenAgain(userId, pageable);
+    }
 }

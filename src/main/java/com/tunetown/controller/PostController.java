@@ -10,6 +10,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +51,20 @@ public class PostController {
                 "totalElement", postPage.getTotalElements()
         );
     }
+
+    @GetMapping("/getPostsByAdmin")
+    public Map<String, Object> getPostsByAdmin(@RequestParam(defaultValue = "1") int page,
+                                               @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Post> postPage = postService.getPostsByAdmin(pageable);
+        return Map.of(
+                "currentPage", postPage.getNumber() + 1,
+                "postList", postPage.getContent(),
+                "totalPages", postPage.getTotalPages(),
+                "totalElement", postPage.getTotalElements()
+        );
+    }
+
     @GetMapping("/getByAuthorId")
     public Map<String, Object> getPostByAuthorId(@RequestParam UUID authorId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
         PageRequest pageRequest = PageRequest.of(page - 1, size);
@@ -102,13 +117,11 @@ public class PostController {
 
     @GetMapping("/getById")
     public Post getPostById(@RequestParam int postId){
-        Post post = postService.getPostById(postId);
-        return post;
+        return postService.getPostById(postId);
     }
 
     @GetMapping("/comment/getById")
     public Comment getCommentById(@RequestParam int commentId){
-        Comment comment = postService.getCommentById(commentId);
-        return comment;
+        return postService.getCommentById(commentId);
     }
 }

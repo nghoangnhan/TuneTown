@@ -45,4 +45,10 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
                         "JOIN user_history uh ON s.id = uh.song_id)) as s " +
             "ORDER BY s.listens DESC LIMIT 100", nativeQuery = true)
     List<Song> getListRecommendedSong(UUID userId);
+
+    @Query("SELECT uh.song FROM UserHistory uh " +
+            "WHERE uh.user.id = ?1 " +
+            "GROUP BY uh.song " +
+            "ORDER BY MAX(uh.dateListen) ASC, COUNT(uh) DESC ")
+    List<Song> getSongsForListenAgain(UUID userId, Pageable pageable);
 }
