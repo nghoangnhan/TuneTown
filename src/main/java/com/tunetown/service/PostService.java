@@ -63,6 +63,10 @@ public class PostService {
         return postRepository.getAllPosts(userId, pageable);
     }
 
+    public Page<Post> getPostsByAdmin(Pageable pageable) {
+        return postRepository.getPostsByAdmin(pageable);
+    }
+
     public Page<Post> getPostByAuthorId(UUID authorId, Pageable pageable){
         return postRepository.getPostByAuthorId(authorId, pageable);
     }
