@@ -2,8 +2,11 @@ package com.tunetown.controller;
 
 import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
+import com.tunetown.model.User;
 import com.tunetown.service.FirebaseStorageService;
 import com.tunetown.service.SongService;
+import com.tunetown.service.UserService;
+import com.tunetown.service.jwt.JwtService;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +35,10 @@ public class SongController {
 
     @Resource
     FirebaseStorageService firebaseStorageService;
+    @Resource
+    JwtService jwtService;
+    @Resource
+    UserService userService;
 
     /**
      * Get songs by numbers in each page using Paging Technique
@@ -161,6 +168,17 @@ public class SongController {
         return Map.of(
                 "pageNo", page + 1,
                 "songList", songList
+        );
+    }
+
+    @GetMapping("/listenAgain")
+    public Map<String, Object> getSongsForListenAgain(@RequestHeader("Authorization") String accessToken) {
+        String token = accessToken.substring(6);
+        String email = jwtService.extractUserEmail(token);
+        User user = userService.getActiveUserByEmail(email);
+
+        return Map.of(
+                "songs", songService.getSongsForListenAgain(user.getId())
         );
     }
 }
