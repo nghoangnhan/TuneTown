@@ -56,6 +56,19 @@ public class SongController {
                 "totalElement", songPage.getTotalElements()
         );
     }
+
+    @GetMapping("/getAllSongsByAdmin")
+    public Map<String, Object> getAllSongsByAdmin(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        Page<Song> songPage = songService.getAllSongsByAdmin(pageRequest);
+        return Map.of(
+                "songList", songPage.getContent(),
+                "currentPage", songPage.getNumber() + 1,
+                "totalPages", songPage.getTotalPages(),
+                "totalElement", songPage.getTotalElements()
+        );
+    }
+
     @GetMapping("/getSongById")
     public Song getSongById(@RequestParam int songId) {
         return songService.getActiveSongById(songId);
