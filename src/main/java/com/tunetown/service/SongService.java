@@ -43,8 +43,8 @@ public class SongService {
     public Page<Song> getAllSongs(Pageable pageable){
         return songRepository.getByStatus(1, pageable);
     }
-    public Page<Song> getAllSongsByAdmin(Pageable pageable) {
-        return songRepository.getAllSongsByAdmin(pageable);
+    public List<Song> getAllSongsByAdmin() {
+        return songRepository.getAllSongsByAdmin();
     }
 
     /**
