@@ -190,4 +190,10 @@ public class SongController {
                 "songs", songService.getSongsForListenAgain(user.getId())
         );
     }
+
+    @PostMapping("/combineData")
+    public byte[] combineData(@RequestParam("songId") Integer songId){
+        byte[] mp3Data = firebaseStorageService.combineMP3(songId);
+        return mp3Data;
+    }
 }
