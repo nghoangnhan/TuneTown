@@ -135,6 +135,7 @@ public class SongService {
             Integer likes = song.getLikes();
             Integer status = song.getStatus();
             String lyric = song.getLyric();
+            List<User> artists = song.getArtists();
 
 
             // Check valid before update
@@ -171,6 +172,9 @@ public class SongService {
             if(lyric != null && !Objects.equals(songUpdate.getLyric(), lyric))
             {
                 songUpdate.setLyric(lyric);
+            }
+            if(artists != null) {
+                songUpdate.setArtists(artists);
             }
             songRepository.save(songUpdate);
             return true;
