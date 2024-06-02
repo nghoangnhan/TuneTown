@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -155,5 +156,32 @@ public class PlaylistService {
             addSongToPlaylist(song.getId(), savedPlaylist.getId());
 
         return savedPlaylist;
+    }
+
+    public List<Playlist> getPublicPlaylist(UUID userId) {
+        return playlistRepository.getPublicPlaylist(userId);
+    }
+
+    public void savePlaylist(UUID userId, int playlistId) {
+        Playlist dbPlaylist = getPlaylistById(playlistId);
+
+        Playlist playlist = new Playlist();
+        playlist.setUser(new User(userId));
+        playlist.setPlaylistType("Private");
+        playlist.setPlaylistName(dbPlaylist.getPlaylistName());
+        playlist.setCoverArt(dbPlaylist.getCoverArt());
+
+        Playlist savedPlaylist = playlistRepository.save(playlist);
+        List<PlaylistSongs> playlistSongs = playlistSongsRepository.getPlaylistSongsById(playlistId);
+
+        List<PlaylistSongs> newPlaylistSongs = new ArrayList<>();
+        for(PlaylistSongs ps : playlistSongs) {
+            PlaylistSongs newPS = new PlaylistSongs();
+            newPS.setSong(ps.getSong());
+            newPS.setPlaylist(savedPlaylist);
+            newPS.setOrderSong(ps.getOrderSong());
+            newPlaylistSongs.add(newPS);
+        }
+        playlistSongsRepository.saveAll(newPlaylistSongs);
     }
 }
