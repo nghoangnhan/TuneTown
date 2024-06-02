@@ -58,14 +58,10 @@ public class SongController {
     }
 
     @GetMapping("/getAllSongsByAdmin")
-    public Map<String, Object> getAllSongsByAdmin(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        Page<Song> songPage = songService.getAllSongsByAdmin(pageRequest);
+    public Map<String, Object> getAllSongsByAdmin(){
+        List<Song> songList = songService.getAllSongsByAdmin();
         return Map.of(
-                "songList", songPage.getContent(),
-                "currentPage", songPage.getNumber() + 1,
-                "totalPages", songPage.getTotalPages(),
-                "totalElement", songPage.getTotalElements()
+                "songList", songList
         );
     }
 

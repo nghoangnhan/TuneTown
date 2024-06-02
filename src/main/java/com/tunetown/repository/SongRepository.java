@@ -18,7 +18,7 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
     Page<Song> getByStatus(int status, Pageable pageable);
 
     @Query("SELECT s FROM Song s")
-    Page<Song> getAllSongsByAdmin(Pageable pageable);
+    List<Song> getAllSongsByAdmin();
 
     @Query("SELECT s FROM Song s JOIN s.artists a WHERE s.status = 1 AND ((s.songName LIKE %:songName% OR a.userName LIKE %:songName%)" +
             " OR (s.songName LIKE %:songName% AND a.userName LIKE %:artistName%) " +
