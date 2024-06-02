@@ -193,17 +193,12 @@ public class FirebaseStorageService {
         }
         return false;
     }
-    public byte[] combineMP3(Integer songId, String mp3Link) {
+    public byte[] combineMP3(Integer songId) {
         try {
             String[] parts = new String[]{""};
             Optional<Song> optionalSong = songRepository.findById(songId);
-            if (optionalSong.isEmpty()){
-                parts = mp3Link.split("audios/");
-            }
-            else{
-                Song song = optionalSong.get();
-                parts = song.getSongData().split("audios/");
-            }
+            Song song = optionalSong.get();
+            parts = song.getSongData().split("audios/");
             String fileName = parts[1].split("/")[0];
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
