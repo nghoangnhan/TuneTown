@@ -14,4 +14,7 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Integer> {
 
     @Query("SELECT p FROM Playlist p WHERE p.user.id = ?1 AND p.playlistType = 'Recommended'")
     Optional<Playlist> getUserRecommendedPlaylist(UUID userId);
+
+    @Query("SELECT p FROM Playlist p WHERE p.user.id = ?1 AND p.playlistType='Public'")
+    List<Playlist> getPublicPlaylist(UUID userId);
 }
