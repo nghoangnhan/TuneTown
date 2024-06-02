@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -36,10 +35,8 @@ public class PlaylistController {
     }
 
     @GetMapping("/getPublicPlaylist")
-    public Map<String, Object> getPublicPlaylist(@RequestParam UUID userId) {
-        return Map.of(
-                "playlists", playlistService.getPublicPlaylist(userId)
-        );
+    public List<Playlist> getPublicPlaylist(@RequestParam UUID userId) {
+        return playlistService.getPublicPlaylist(userId);
     }
 
     @PostMapping("/savePlaylist")
