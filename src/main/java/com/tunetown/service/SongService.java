@@ -132,7 +132,6 @@ public class SongService {
             String poster = song.getPoster();
             String data = song.getSongData();
             Integer listens = song.getListens();
-            Integer likes = song.getLikes();
             Integer status = song.getStatus();
             String lyric = song.getLyric();
             List<User> artists = song.getArtists();
@@ -157,11 +156,6 @@ public class SongService {
             if(listens != null && !Objects.equals(songUpdate.getListens(), listens))
             {
                 songUpdate.setListens(listens);
-            }
-
-            if(likes != null && !Objects.equals(songUpdate.getLikes(), likes))
-            {
-                songUpdate.setLikes(likes);
             }
 
             if(status != null && !Objects.equals(songUpdate.getStatus(), status))

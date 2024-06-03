@@ -23,7 +23,6 @@ public class Song {
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Genre> genres;
     private String songData;
-    private int likes;
     private int listens;
     private int status;
     @Lob
