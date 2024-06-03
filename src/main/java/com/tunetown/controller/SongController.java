@@ -180,6 +180,13 @@ public class SongController {
         );
     }
 
+    @GetMapping("/getSongsByArtistNoPaging")
+    public Map<String, Object> getSongsByArtistNoPaging(@RequestParam UUID artistID) {
+        return Map.of(
+                "songs", songService.getSongsByArtistNoPaging(artistID)
+        );
+    }
+
     @GetMapping("/listenAgain")
     public Map<String, Object> getSongsForListenAgain(@RequestHeader("Authorization") String accessToken) {
         String token = accessToken.substring(6);
