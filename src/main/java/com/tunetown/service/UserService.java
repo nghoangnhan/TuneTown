@@ -150,7 +150,7 @@ public class UserService {
         List<Object[]> artistDetailList = userRepository.getArtistDetail(artistId);
         Object[] artistDetails = artistDetailList.get(0);
 
-        List<Song> topTracks = songRepository.getTopSongsOfArtist(artistId, Pageable.ofSize(10));
+        List<Song> topTracks = songRepository.getTopSongsOfArtist(artistId, Pageable.ofSize(5));
 
         int numberOfFollowers = followerService.getNumberOfFollowers(artistId);
         int numberOfFollowing = followerService.getNumberOfFollowing(artistId);
