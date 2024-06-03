@@ -1,10 +1,13 @@
 package com.tunetown.repository;
 
+import com.tunetown.model.Genre;
 import com.tunetown.model.Song;
+import com.tunetown.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,23 +38,23 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
     @Query("SELECT s FROM Song s JOIN s.artists a WHERE a.id = ?1 ORDER BY s.listens")
     List<Song> getTopSongsOfArtist(UUID artistID, Pageable pageable);
 
-    @Query(value =
-            "SELECT * FROM (" +
-                    "(SELECT DISTINCT s.* " +
-                        "FROM user u, song s " +
-                            "JOIN song_genres sg ON s.id = sg.song_id " +
-                            "JOIN user_genres ug ON ug.genres_id = sg.genres_id " +
-                    "WHERE u.id = ?1 ) " +
-                    "UNION " +
-                    "(SELECT DISTINCT s.* " +
-                        "FROM song s " +
-                        "JOIN user_history uh ON s.id = uh.song_id)) as s " +
-            "ORDER BY s.listens DESC LIMIT 100", nativeQuery = true)
-    List<Song> getListRecommendedSong(UUID userId);
-
     @Query("SELECT uh.song FROM UserHistory uh " +
             "WHERE uh.user.id = ?1 " +
+            "AND uh.song.status = 1 " +
             "GROUP BY uh.song " +
             "ORDER BY MAX(uh.dateListen) ASC, COUNT(uh) DESC ")
     List<Song> getSongsForListenAgain(UUID userId, Pageable pageable);
+
+    @Query("SELECT s FROM Song s " +
+            "WHERE ((:artists1 IS NULL) OR (s.artists IN :artists2)) " +
+            "OR ((:genres1 IS NULL) OR (s.genres IN :genres2)) " +
+            "ORDER BY RAND()")
+    List<Song> getRecommendSongs(@Param("genres1") List<Genre> genres1, @Param("genres2") List<Genre> genres2,
+                                 @Param("artists1") List<User> artists1, @Param("artists2") List<User> artists2,
+                                 Pageable pageable);
+
+    @Query("SELECT s FROM Song s " +
+            "WHERE s.id NOT IN ( SELECT uh.song.id FROM UserHistory uh WHERE uh.user.id = ?1 ) " +
+            "ORDER BY RAND()")
+    List<Song> getShouldTrySongs(UUID userId, Pageable pageable);
 }

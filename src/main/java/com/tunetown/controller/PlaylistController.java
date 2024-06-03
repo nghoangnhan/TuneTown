@@ -86,7 +86,7 @@ public class PlaylistController {
     }
 
     @GetMapping("/get-recommend-songs")
-    public Playlist getRecommendPlaylist(Authentication authentication) {
+    public List<Playlist> getRecommendPlaylist(Authentication authentication) {
         User user = userService.getActiveUserByEmail(authentication.getName());
         return playlistService.createRecommendedPlaylist(user);
     }
