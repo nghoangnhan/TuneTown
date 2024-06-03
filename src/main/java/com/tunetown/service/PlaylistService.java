@@ -1,22 +1,18 @@
 package com.tunetown.service;
 
-import com.tunetown.model.Playlist;
-import com.tunetown.model.PlaylistSongs;
-import com.tunetown.model.Song;
-import com.tunetown.model.User;
+import com.tunetown.model.*;
 import com.tunetown.repository.PlaylistRepository;
 import com.tunetown.repository.PlaylistSongsRepository;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -29,6 +25,8 @@ public class PlaylistService {
     SongService songService;
     @Resource
     PlaylistSongsRepository playlistSongsRepository;
+    @Resource
+    FollowerService followerService;
 
     public void addNewPlaylistToUser(UUID userId) {
         User user = userService.getUserById(userId);
@@ -131,31 +129,58 @@ public class PlaylistService {
         }
     }
 
+    private List<Song> getRecommendedSongsInPlaylist(UUID userId) {
+        List<Follower> followings = followerService.getUserFollowing(userId);
+        List<User> listArtists = new ArrayList<>();
+        for(Follower f : followings) {
+            listArtists.add(f.getSubject());
+        }
+        List<Genre> listFavouriteGenres = userService.getUserFavouriteGenres(userId);
+        Pageable pageable = Pageable.ofSize(20);
+
+        if(listArtists.isEmpty()) listArtists = null;
+        if(listFavouriteGenres.isEmpty()) listFavouriteGenres = null;
+        return songService.getRecommendedSongs(listFavouriteGenres, listArtists, pageable);
+    }
+
+    private void createARecommendedPlaylist(int number, User user) {
+        Playlist playlist = new Playlist();
+        playlist.setUser(user);
+        playlist.setPlaylistName("Your mix #" + number);
+        playlist.setPlaylistType("Recommended");
+        playlist.setCreatedDate(LocalDate.now());
+        Playlist savedPlaylist = playlistRepository.save(playlist);
+
+        List<Song> listSongs = getRecommendedSongsInPlaylist(user.getId());
+        for(Song song : listSongs) {
+            addSongToPlaylist(song.getId(), savedPlaylist.getId());
+        }
+    }
+
     /**
      * Create a playlist based on recommended songs.
      */
-    public Playlist createRecommendedPlaylist(User user) {
-        Optional<Playlist> optionalPlaylist = playlistRepository.getUserRecommendedPlaylist(user.getId());
-        Playlist savedPlaylist;
-        if(optionalPlaylist.isEmpty()) {
-            Playlist playlist = new Playlist();
-            playlist.setUser(user);
-            playlist.setPlaylistName("Songs from what you like");
-            playlist.setPlaylistType("Recommended");
+    public List<Playlist> createRecommendedPlaylist(User user) {
+        LocalDate currentDate = LocalDate.now();
+        List<Playlist> listPlaylists = playlistRepository.getUserRecommendedPlaylist(user.getId());
+        if(listPlaylists.isEmpty()) {
+            for(int i = 1; i <= 3; i++) {
+                createARecommendedPlaylist(i, user);
+            }
+        } else if(!listPlaylists.get(0).getCreatedDate().equals(currentDate)) {
+            for(Playlist p : listPlaylists) {
+                List<PlaylistSongs> playlistSongs = playlistSongsRepository.getPlaylistSongsById(p.getId());
+                playlistSongsRepository.deleteAll(playlistSongs);
 
-            savedPlaylist = playlistRepository.save(playlist);
+                List<Song> listSongs = getRecommendedSongsInPlaylist(user.getId());
+                for(Song song : listSongs) {
+                    addSongToPlaylist(song.getId(), p.getId());
+                }
+                p.setCreatedDate(LocalDate.now());
+                playlistRepository.save(p);
+            }
         }
-        else {
-            savedPlaylist = optionalPlaylist.get();
-            List<PlaylistSongs> playlistSongs = playlistSongsRepository.getPlaylistSongsById(savedPlaylist.getId());
-            playlistSongsRepository.deleteAll(playlistSongs);
-        }
-
-        List<Song> recommendedSongs = songService.getRecommendedSongs(user);
-        for(Song song : recommendedSongs)
-            addSongToPlaylist(song.getId(), savedPlaylist.getId());
-
-        return savedPlaylist;
+        return playlistRepository.getUserRecommendedPlaylist(user.getId());
     }
 
     public List<Playlist> getPublicPlaylist(UUID userId) {

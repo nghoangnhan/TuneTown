@@ -191,9 +191,19 @@ public class SongController {
         );
     }
 
+    @GetMapping("/getShouldTry")
+    public Map<String, Object> getShouldTrySongs(@RequestHeader("Authorization") String accessToken) {
+        String token = accessToken.substring(6);
+        String email = jwtService.extractUserEmail(token);
+        User user = userService.getActiveUserByEmail(email);
+
+        return Map.of(
+                "songs", songService.getShouldTrySongs(user.getId())
+        );
+    }
+
     @PostMapping("/combineData")
     public byte[] combineData(@RequestParam("songId") Integer songId){
-        byte[] mp3Data = firebaseStorageService.combineMP3(songId);
-        return mp3Data;
+        return firebaseStorageService.combineMP3(songId);
     }
 }

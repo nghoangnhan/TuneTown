@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,7 @@ public class Playlist {
     private User user;
     private String playlistType;
     private String coverArt;
+    private LocalDate createdDate;
 
     @Transient
     private List<PlaylistSongs> playlistSongsList;

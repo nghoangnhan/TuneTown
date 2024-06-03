@@ -254,8 +254,8 @@ public class SongService {
     /**
      * Get List of recommended Songs.
      */
-    public List<Song> getRecommendedSongs(User user) {
-        return songRepository.getListRecommendedSong(user.getId());
+    public List<Song> getRecommendedSongs(List<Genre> genres,List<User> artists, Pageable pageable) {
+        return songRepository.getRecommendSongs(genres, genres, artists, artists, pageable);
     }
 
 
@@ -267,5 +267,10 @@ public class SongService {
     public List<Song> getSongsForListenAgain(UUID userId) {
         Pageable pageable = Pageable.ofSize(20);
         return songRepository.getSongsForListenAgain(userId, pageable);
+    }
+
+    public List<Song> getShouldTrySongs(UUID userId) {
+        Pageable pageable = Pageable.ofSize(20);
+        return songRepository.getShouldTrySongs(userId, pageable);
     }
 }
