@@ -160,6 +160,7 @@ public class UserService {
         artistInfo.put("name", artistDetails[1]);
         artistInfo.put("avatar", artistDetails[2]);
         artistInfo.put("bio", user.getUserBio());
+        artistInfo.put("role", user.getRole());
         artistInfo.put("songs", topTracks);
 
         Optional<Follower> optionalFollower = followerService.getFollowInformation(user.getId(), artistId);
