@@ -13,7 +13,7 @@ public interface CommunityRepository extends JpaRepository<Community, UUID> {
     List<Community> getAllCommunity();
 
     @Query("SELECT c FROM Community c WHERE c.communityId = ?1")
-    Optional<Community> getCommunityById(UUID hostId);
+    Community getCommunityById(UUID hostId);
 
     @Query("SELECT c FROM Community c WHERE c.communityName LIKE %:communityName%")
     List<Community> searchCommunityByName(String communityName);

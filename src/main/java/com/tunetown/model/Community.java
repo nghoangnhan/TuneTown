@@ -26,11 +26,11 @@ public class Community {
     private UUID id;
     private UUID communityId;
     private String communityName;
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<User> hosts;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
+    private User host;
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<User> joinUsers;
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<User> approveRequests;
     @OneToMany(fetch = FetchType.EAGER)
     private List<Message> communityMessages;

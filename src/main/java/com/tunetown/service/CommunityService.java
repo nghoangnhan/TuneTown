@@ -34,15 +34,15 @@ public class CommunityService {
         if (optionalHost.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community with id = " + hostId + " does not exists!");
         }
-        Community community = communityRepository.getCommunityById(hostId).get();
+        Community community = communityRepository.getCommunityById(hostId);
         return community;
     }
 
     public void createCommunity(Community community){
-        UUID hostId = community.getHosts().get(0).getId();
-        Optional<User> optionalHost = userRepository.findById(hostId);
+        User host = community.getHost();
+        Optional<User> optionalHost = userRepository.findById(host.getId());
         if (optionalHost.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Host with id = " + hostId + " does not exists!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Host with id = " + host.getId() + " does not exists!");
         }
         communityRepository.save(community);
         if(community.getCommunityMessages() == null){
@@ -58,15 +58,17 @@ public class CommunityService {
             messageRepository.save(message);
             community.setCommunityMessages(messageList);
 
-            ChatList chatList = chatListRepository.getChatListByUserId(community.getCommunityId());
+
+
+            ChatList chatList = chatListRepository.getChatListByUser(optionalHost.get());
             if(chatList == null){
                 chatList = new ChatList();
-                chatList.setUserId(hostId);
+                chatList.setUser(host);
             }
             if(chatList.getSentCommunity() == null){
                 chatList.setSentCommunity(new ArrayList<>());
             }
-            chatList.getSentCommunity().add(community.getCommunityId());
+            chatList.getSentCommunity().add(community);
             chatListRepository.save(chatList);
         }
     }
@@ -76,17 +78,17 @@ public class CommunityService {
         if (optionalHost.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Host with id = " + hostId + " does not exists!");
         }
-        Community community = communityRepository.getCommunityById(hostId).get();
+        Community community = communityRepository.getCommunityById(hostId);
         for(User user: community.getJoinUsers()){
-            ChatList chatList = chatListRepository.getChatListByUserId(user.getId());
+            ChatList chatList = chatListRepository.getChatListByUser(user);
             chatList.getSentCommunity().remove(community.getCommunityId());
         }
         communityRepository.delete(community);
     }
 
     public User approveRequest(ApproveRequest approveRequest){
-        Community community = communityRepository.getCommunityById(approveRequest.getHostId()).get();
-        Optional<User> optionalApproveUser = userRepository.findById(approveRequest.getApproveUserId());
+        Community community = communityRepository.getCommunityById(approveRequest.getHost().getId());
+        Optional<User> optionalApproveUser = userRepository.findById(approveRequest.getApproveUser().getId());
         User approveUser = optionalApproveUser.get();
         community.getApproveRequests().remove(approveUser);
         if(approveRequest.getIsApprove() == 1){
@@ -101,15 +103,15 @@ public class CommunityService {
             messageRepository.save(message);
             community.getCommunityMessages().add(message);
 
-            ChatList chatList = chatListRepository.getChatListByUserId(approveUser.getId());
+            ChatList chatList = chatListRepository.getChatListByUser(approveUser);
             if(chatList == null){
                 chatList = new ChatList();
-                chatList.setUserId(approveUser.getId());
+                chatList.setUser(approveUser);
             }
             if(chatList.getSentCommunity() == null){
                 chatList.setSentCommunity(new ArrayList<>());
             }
-            chatList.getSentCommunity().add(community.getCommunityId());
+            chatList.getSentCommunity().add(community);
             chatListRepository.save(chatList);
         }
         communityRepository.save(community);
@@ -161,8 +163,9 @@ public class CommunityService {
         User user = optionalUser.get();
 
         community.getJoinUsers().remove(user);
-        ChatList chatList = chatListRepository.getChatListByUserId(userId);
-        chatList.getSentCommunity().remove(community.getCommunityId());
+        ChatList chatList = chatListRepository.getChatListByUser(user);
+        log.info("TESTTT: " + community.getId());
+        chatList.getSentCommunity().remove(community);
         chatListRepository.save(chatList);
         communityRepository.save(community);
     }

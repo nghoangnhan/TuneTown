@@ -19,9 +19,10 @@ public class ChatList {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private UUID userId;
-    @ElementCollection
-    private List<UUID> sentUser;
-    @ElementCollection
-    private List<UUID> sentCommunity;
+    @OneToOne(fetch = FetchType.LAZY)
+    private User user;
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<User> sentUser;
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Community> sentCommunity;
 }
