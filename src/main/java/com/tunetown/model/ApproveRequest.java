@@ -1,5 +1,7 @@
 package com.tunetown.model;
 
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +15,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ApproveRequest {
     private int isApprove;
-    private UUID hostId;
-    private UUID approveUserId;
+    @OneToOne(fetch = FetchType.LAZY)
+    private User host;
+    @OneToOne(fetch = FetchType.LAZY)
+    private User approveUser;
 }

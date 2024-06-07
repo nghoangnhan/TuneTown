@@ -47,7 +47,7 @@ public class CommunityController {
         else{
             approveResponse = "Refuse";
         }
-        return ResponseEntity.ok(approveResponse + " user " + approveRequest.getApproveUserId() + " joining community");
+        return ResponseEntity.ok(approveResponse + " user " + approveRequest.getApproveUser().getId() + " joining community");
     }
 
     @PostMapping("/joinRequest")

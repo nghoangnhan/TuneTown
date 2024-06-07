@@ -39,6 +39,7 @@ public class MessageService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + sendUserId + " does not exists!");
             }
         }
+        User sendUser = optionalUser.get();
 
         // Check receiveUserId exists
         Optional<User> receiveUserIdCheck = userRepository.findById(receiveUserId);
@@ -51,31 +52,32 @@ public class MessageService {
 
         try{
             if(optionalUser.isPresent() && receiveUserIdCheck.isPresent()){
+                User receiveUser = receiveUserIdCheck.get();
                 // Update chat list user
-                ChatList chatListSent = chatListRepository.getChatListByUserId(sendUserId);
-                ChatList chatListReceived = chatListRepository.getChatListByUserId(receiveUserId);
+                ChatList chatListSent = chatListRepository.getChatListByUser(sendUser);
+                ChatList chatListReceived = chatListRepository.getChatListByUser(receiveUser);
 
                 // Initialize if the chatlist is null
                 if(chatListSent == null){
                     chatListSent = new ChatList();
-                    chatListSent.setUserId(sendUserId);
+                    chatListSent.setUser(sendUser);
                 }
 
-                List<UUID> sentUserList = chatListSent.getSentUser();
+                List<User> sentUserList = chatListSent.getSentUser();
                 if (sentUserList == null) {
                     sentUserList = new ArrayList<>(); // Initialize the list if it's null
                 }
-                if (!sentUserList.contains(receiveUserId)) {
-                    sentUserList.add(0, receiveUserId);
+                if (!sentUserList.contains(receiveUser)) {
+                    sentUserList.add(0, receiveUser);
                 }
                 chatListSent.setSentUser(sentUserList);
 
 
                 if(chatListReceived == null){
                     chatListReceived = new ChatList();
-                    chatListReceived.setUserId(receiveUserId);
+                    chatListReceived.setUser(receiveUser);
                 }
-                List<UUID> receiveUserList = chatListReceived.getSentUser();
+                List<User> receiveUserList = chatListReceived.getSentUser();
 
 
                 // Re-order chat list of received user
@@ -83,8 +85,8 @@ public class MessageService {
                     receiveUserList = new ArrayList<>(); // Initialize the list if it's null
                 }
 
-                if (!receiveUserList.contains(sendUserId)){
-                    receiveUserList.add(0, sendUserId);
+                if (!receiveUserList.contains(sendUser)){
+                    receiveUserList.add(0, sendUser);
                 }
                 chatListReceived.setSentUser(receiveUserList);
 
@@ -142,7 +144,7 @@ public class MessageService {
         Map<String, Object> messageUserInfo = new HashMap<>();
 
         if(optionalUser.isPresent() && optionalSentUser.isPresent()){
-            ChatDeleted chatDeleted = chatDeletedRepository.getChatDeleted(userId, sentId);
+            ChatDeleted chatDeleted = chatDeletedRepository.getChatDeleted(optionalUser.get(), optionalSentUser.get());
             User sentUser = optionalSentUser.get();
 
             List<Message> messageList = messageRepository.getMessageByUserId(userId, sentId);
@@ -179,7 +181,11 @@ public class MessageService {
     }
 
     public Map<String, Object> loadChatList(UUID userId){
-        ChatList chatList = chatListRepository.getChatListByUserId(userId);
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (!optionalUser.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id = " + userId + " does not exists!");
+        }
+        ChatList chatList = chatListRepository.getChatListByUser(optionalUser.get());
         List<Message> messageList = new ArrayList<>();
         Map<String, Object> chatListInfo = new LinkedHashMap<>(); // LinkedHashMap() to use ordered list as input
 
@@ -190,23 +196,21 @@ public class MessageService {
 
         // Check sentUser list null
         if(chatList.getSentUser() != null){
-            for(UUID id: chatList.getSentUser()){
-                User user = userRepository.findById(id).get();
+            for(User user: chatList.getSentUser()){
                 if(user != null) {
-                    messageList = messageRepository.getMessageByUserId(userId, id);
+                    messageList = messageRepository.getMessageByUserId(userId, user.getId());
                     if (!messageList.isEmpty()) {
                         Message lastMessage = messageList.get(messageList.size() - 1);
                         Map<String, Object> userChatInfo = new HashMap<>();
                         userChatInfo.put("user", user);
                         userChatInfo.put("lastMessage", lastMessage);
-                        chatListInfo.put(String.valueOf(id), userChatInfo);
+                        chatListInfo.put(String.valueOf(user.getId()), userChatInfo);
                     }
                 }
             }
         }
         if(chatList.getSentCommunity() != null){
-            for(UUID hostId: chatList.getSentCommunity()){
-                Community community = communityRepository.getCommunityById(hostId).get();
+            for(Community community: chatList.getSentCommunity()){
                 if(community != null) {
                     messageList = messageRepository.getMessageByUserId(userId, community.getId());
                     if (!messageList.isEmpty()) {
@@ -250,19 +254,19 @@ public class MessageService {
     }
 
     public void deleteChat(ChatList chatList){
-        Optional<User> optionalUser = userRepository.findById(chatList.getUserId());
+        Optional<User> optionalUser = userRepository.findById(chatList.getUser().getId());
         if (!optionalUser.isPresent()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat with id = " + chatList.getUserId() + " does not exists!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat with id = " + chatList.getUser().getId() + " does not exists!");
         }
 
-        ChatList chatList1 = chatListRepository.getChatListByUserId(chatList.getUserId());
+        ChatList chatList1 = chatListRepository.getChatListByUser(chatList.getUser());
         chatList1.getSentUser().remove(chatList.getSentUser().get(0));
 
-        ChatDeleted chatDeleted = chatDeletedRepository.getChatDeleted(chatList.getUserId(), chatList.getSentUser().get(0));
+        ChatDeleted chatDeleted = chatDeletedRepository.getChatDeleted(chatList.getUser(), chatList.getSentUser().get(0));
         if(chatDeleted == null){
             chatDeleted = new ChatDeleted();
-            chatDeleted.setUserId(chatList.getUserId());
-            chatDeleted.setSentUserId(chatList.getSentUser().get(0));
+            chatDeleted.setUser(chatList.getUser());
+            chatDeleted.setSentUser(chatList.getSentUser().get(0));
         }
         chatDeleted.setTimeDeleted(LocalDateTime.now());
         chatDeletedRepository.save(chatDeleted);
