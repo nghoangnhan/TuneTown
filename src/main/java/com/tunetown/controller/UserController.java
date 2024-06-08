@@ -16,6 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -155,5 +159,19 @@ public class UserController {
     @PostMapping(path = "/checkCommunityExist")
     public int checkCommunityExist(@RequestParam("artistId") UUID artistId){
         return userService.checkCommunityExist(artistId);
+    }
+
+    @GetMapping(path = "/createArtistsChart")
+    public Map<String, Object> creatArtistsChart(@RequestParam("startTime") String startString, @RequestParam("endTime") String endString){
+        // Convert to LocalDateTime before compare
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        // Get the start time of startDate
+        LocalDateTime startDate = LocalDate.parse(startString, formatter).atStartOfDay();
+        // Get the end time of endDate
+        LocalDateTime endDate = LocalDate.parse(endString, formatter).atTime(LocalTime.MAX);
+
+        return Map.of(
+                "artistsChart", userService.createArtistsChart(startDate, endDate)
+        );
     }
 }

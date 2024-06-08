@@ -17,4 +17,10 @@ public interface UserHistoryRepository extends JpaRepository<UserHistory, UUID> 
 
     @Query("SELECT uh FROM UserHistory uh WHERE uh.dateListen BETWEEN ?1 AND ?2")
     List<UserHistory> getTopSongByPeriod(LocalDateTime startTime, LocalDateTime endTime);
+
+    @Query("SELECT new UserHistory(a, COUNT(uh)) FROM UserHistory uh JOIN uh.song.artists a " +
+            "WHERE uh.dateListen BETWEEN ?1 AND ?2 " +
+            "GROUP BY a " +
+            "ORDER BY COUNT(uh) DESC")
+    List<UserHistory> createArtistChart(LocalDateTime startTime, LocalDateTime endTime);
 }

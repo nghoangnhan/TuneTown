@@ -247,4 +247,8 @@ public class UserService {
     public int checkCommunityExist(UUID artistId){
         return communityRepository.checkCommunityExist(artistId);
     }
+
+    public List<UserHistory> createArtistsChart(LocalDateTime startTime, LocalDateTime endTime) {
+        return userHistoryRepository.createArtistChart(startTime, endTime);
+    }
 }

@@ -23,8 +23,16 @@ public class UserHistory {
     private Song song;
     private LocalDateTime dateListen;
 
+    @Transient
+    private long totalListens;
+
     public UserHistory(Song song, LocalDateTime dateListen) {
         this.song = song;
         this.dateListen = dateListen;
+    }
+
+    public UserHistory(User user, long totalListens) {
+        this.user = user;
+        this.totalListens = totalListens;
     }
 }
