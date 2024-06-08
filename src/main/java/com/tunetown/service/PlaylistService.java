@@ -155,6 +155,8 @@ public class PlaylistService {
         for(Song song : listSongs) {
             addSongToPlaylist(song.getId(), savedPlaylist.getId());
         }
+        savedPlaylist.setCoverArt(listSongs.get(0).getPoster());
+        playlistRepository.save(savedPlaylist);
     }
 
     /**
@@ -164,7 +166,7 @@ public class PlaylistService {
         LocalDate currentDate = LocalDate.now();
         List<Playlist> listPlaylists = playlistRepository.getUserRecommendedPlaylist(user.getId());
         if(listPlaylists.isEmpty()) {
-            for(int i = 1; i <= 3; i++) {
+            for(int i = 1; i <= 5; i++) {
                 createARecommendedPlaylist(i, user);
             }
         } else if(!listPlaylists.get(0).getCreatedDate().equals(currentDate)) {
@@ -177,6 +179,7 @@ public class PlaylistService {
                     addSongToPlaylist(song.getId(), p.getId());
                 }
                 p.setCreatedDate(LocalDate.now());
+                p.setCoverArt(listSongs.get(0).getPoster());
                 playlistRepository.save(p);
             }
         }

@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PlaylistRepository extends JpaRepository<Playlist, Integer> {
-    @Query("SELECT p FROM Playlist p WHERE p.user.id = ?1")
+    @Query("SELECT p FROM Playlist p " +
+            "WHERE p.user.id = ?1 " +
+            "AND p.playlistType = 'Public' OR p.playlistType = 'Private'")
     List<Playlist> getAllPlaylistsByUserId(UUID userId);
 
     @Query("SELECT p FROM Playlist p " +
