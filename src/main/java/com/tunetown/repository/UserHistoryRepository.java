@@ -1,6 +1,7 @@
 package com.tunetown.repository;
 
 import com.tunetown.model.UserHistory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -22,5 +23,5 @@ public interface UserHistoryRepository extends JpaRepository<UserHistory, UUID> 
             "WHERE uh.dateListen BETWEEN ?1 AND ?2 " +
             "GROUP BY a " +
             "ORDER BY COUNT(uh) DESC")
-    List<UserHistory> createArtistChart(LocalDateTime startTime, LocalDateTime endTime);
+    List<UserHistory> createArtistChart(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
 }

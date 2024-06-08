@@ -249,6 +249,7 @@ public class UserService {
     }
 
     public List<UserHistory> createArtistsChart(LocalDateTime startTime, LocalDateTime endTime) {
-        return userHistoryRepository.createArtistChart(startTime, endTime);
+        Pageable pageable = Pageable.ofSize(10);
+        return userHistoryRepository.createArtistChart(startTime, endTime, pageable);
     }
 }
