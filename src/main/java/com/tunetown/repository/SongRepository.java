@@ -48,9 +48,9 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
             "ORDER BY MAX(uh.dateListen) ASC, COUNT(uh) DESC ")
     List<Song> getSongsForListenAgain(UUID userId, Pageable pageable);
 
-    @Query("SELECT s FROM Song s " +
-            "WHERE ((:artists1 IS NULL) OR (s.artists IN :artists2)) " +
-            "OR ((:genres1 IS NULL) OR (s.genres IN :genres2)) " +
+    @Query("SELECT s FROM Song s JOIN s.artists a JOIN s.genres g " +
+            "WHERE ((:artists1 IS NULL) OR (a IN :artists2)) " +
+            "OR ((:genres1 IS NULL) OR (g IN :genres2)) " +
             "ORDER BY RAND()")
     List<Song> getRecommendSongs(@Param("genres1") List<Genre> genres1, @Param("genres2") List<Genre> genres2,
                                  @Param("artists1") List<User> artists1, @Param("artists2") List<User> artists2,
