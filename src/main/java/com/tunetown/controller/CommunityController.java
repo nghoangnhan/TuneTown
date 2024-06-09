@@ -38,16 +38,8 @@ public class CommunityController {
     }
 
     @PostMapping("/approve")
-    public ResponseEntity<String> approveRequest(@RequestBody ApproveRequest approveRequest){
-        communityService.approveRequest(approveRequest);
-        String approveResponse = "";
-        if(approveRequest.getIsApprove() == 1){
-            approveResponse = "Approve";
-        }
-        else{
-            approveResponse = "Refuse";
-        }
-        return ResponseEntity.ok(approveResponse + " user " + approveRequest.getApproveUser().getId() + " joining community");
+    public boolean approveRequest(@RequestBody ApproveRequest approveRequest){
+        return communityService.approveRequest(approveRequest);
     }
 
     @PostMapping("/joinRequest")
