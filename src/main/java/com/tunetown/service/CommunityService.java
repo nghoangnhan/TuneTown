@@ -86,7 +86,7 @@ public class CommunityService {
         communityRepository.delete(community);
     }
 
-    public User approveRequest(ApproveRequest approveRequest){
+    public boolean approveRequest(ApproveRequest approveRequest){
         Community community = communityRepository.getCommunityById(approveRequest.getHost().getId());
         Optional<User> optionalApproveUser = userRepository.findById(approveRequest.getApproveUser().getId());
         User approveUser = optionalApproveUser.get();
@@ -113,9 +113,10 @@ public class CommunityService {
             }
             chatList.getSentCommunity().add(community);
             chatListRepository.save(chatList);
+            return true;
         }
         communityRepository.save(community);
-        return approveUser;
+        return false;
     }
 
     public boolean joinRequest(UUID userId, UUID communityId){
