@@ -34,8 +34,7 @@ public class CommunityService {
         if (optionalHost.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community with id = " + hostId + " does not exists!");
         }
-        Community community = communityRepository.getCommunityById(hostId);
-        return community;
+        return communityRepository.getCommunityById(hostId);
     }
 
     public void createCommunity(Community community){
@@ -81,7 +80,7 @@ public class CommunityService {
         Community community = communityRepository.getCommunityById(hostId);
         for(User user: community.getJoinUsers()){
             ChatList chatList = chatListRepository.getChatListByUser(user);
-            chatList.getSentCommunity().remove(community.getCommunityId());
+            chatList.getSentCommunity().remove(community);
         }
         communityRepository.delete(community);
     }
@@ -172,7 +171,6 @@ public class CommunityService {
     }
 
     public List<Community> searchCommunityByName(String communityName){
-        List<Community> listCommunity = communityRepository.searchCommunityByName(communityName);
-        return listCommunity;
+        return communityRepository.searchCommunityByName(communityName);
     }
 }
